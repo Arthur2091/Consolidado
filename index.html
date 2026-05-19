@@ -3527,7 +3527,7 @@ function deleteEgreso(id) {
 /* ── PRESENTACION / COSTO ───────────────────────────────────────── */
 function _fmtPres(ins) {
   if (!ins.presQty || !ins.presUnit) return '—';
-  const precio = ins.precioSinIVA ?? ins.precioConIVA;
+  const precio = ins.precioConIVA ?? ins.precioSinIVA;
   if (!precio) return `${ins.presQty} ${ins.presUnit}`;
   let costo, label;
   if      (ins.presUnit === 'kg') { costo = precio / ins.presQty;          label = '/kg'; }
@@ -3551,7 +3551,7 @@ const _typeOf = u => ['kg','g'].includes(u) ? 'w' : ['L','ml','cdita','cda','taz
 
 function calcCostoIng(ins, cantidad, unidad) {
   if (!ins) return null;
-  const precio = ins.precioSinIVA ?? ins.precioConIVA;
+  const precio = ins.precioConIVA ?? ins.precioSinIVA;
   if (!precio) return null;
 
   const presQty  = ins.presQty  || 1;
@@ -4198,7 +4198,7 @@ function _erBuscarIns(q) {
     i.nombre.toLowerCase().includes(q.toLowerCase()) || _normIng(i.nombre).includes(_normIng(q))
   ).slice(0, 8);
   res.innerHTML = matches.map(ins => {
-    const precio = ins.precioSinIVA ?? ins.precioConIVA;
+    const precio = ins.precioConIVA ?? ins.precioSinIVA;
     return `<button onclick="_erAddIns('${ins.id}')"
       style="font-size:12px;padding:4px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--ink)">
       ${ins.nombre}${precio ? ' <span style="color:var(--accent);font-family:monospace">$'+precio.toFixed(0)+'</span>' : ''}
@@ -4769,7 +4769,7 @@ function _buscarIngMatch(input, recetaId, ii) {
   ).slice(0, 10);
 
   res.innerHTML = matches.map(ins => {
-    const precio = ins.precioSinIVA ?? ins.precioConIVA;
+    const precio = ins.precioConIVA ?? ins.precioSinIVA;
     const pres   = ins.presQty ? `${ins.presQty}${ins.presUnit}` : ins.unidad || '';
     return `<button onclick="_vincularIng('${recetaId}',${ii},'${ins.id}')"
       style="font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);cursor:pointer;color:var(--ink);white-space:nowrap;text-align:left;display:flex;flex-direction:column;gap:1px">

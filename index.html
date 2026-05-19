@@ -988,22 +988,16 @@ tbody td { padding: 10px 14px; vertical-align: middle; }
 
     <div class="field">
       <label>Presentación (bulto/paquete)</label>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input id="fPresQty" type="number" step="any" min="0" placeholder="ej. 500" style="width:90px" oninput="_updatePresEquiv()">
-        <select id="fPresUnit" onchange="_updatePresEquiv()" style="width:80px">
-          <option value="g">g</option>
-          <option value="kg">kg</option>
-          <option value="ml">ml</option>
-          <option value="L">L</option>
-          <option value="u">u</option>
-        </select>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input id="fPresQty" type="number" step="any" min="0" placeholder="ej. 1" style="width:80px" oninput="_updatePresEquiv()">
+        <input id="fPresUnit" type="text" placeholder="ej. bolsa, kg, L" style="width:90px;font:14px var(--font);padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);outline:none;background:var(--surface)" oninput="_updatePresEquiv()">
         <span id="fPresEquiv" style="font-size:12px;color:var(--accent);font-family:'DM Mono',monospace"></span>
       </div>
-      <span style="font-size:11px;color:var(--ink3)">Cuánto trae el paquete que comprás (ej. manteca 500g, crema 1L, sobres 800u)</span>
+      <span style="font-size:11px;color:var(--ink3)">Cuánto trae el paquete (ej: 1 bolsa, 500 g, 1 L, 12 u)</span>
     </div>
 
     <div class="field" id="fPresUnitWeightWrap" style="display:none">
-      <label>Peso por unidad <span style="font-weight:400;color:var(--ink3)">(solo si la presentación es en "u")</span></label>
+      <label>Peso / volumen por unidad <span style="font-weight:400;color:var(--ink3)">(si la unidad es bolsa, bulto, caja, etc.)</span></label>
       <div style="display:flex;gap:8px;align-items:center">
         <input id="fPresUnitWeight" type="number" step="any" min="0" placeholder="ej. 5" style="width:90px" oninput="_updatePresEquiv()">
         <select id="fPresUnitWeightUnit" onchange="_updatePresEquiv()" style="width:80px">
@@ -1459,31 +1453,29 @@ function parseInsumosSheet(rows) {
 const _PRES_BASE = { kg: 1000, g: 1, L: 1000, ml: 1, u: 1 };
 
 function _updatePresEquiv() {
-  const qty   = parseFloat(document.getElementById('fPresQty').value);
-  const unit  = document.getElementById('fPresUnit').value;
-  const precio = parseFloat(document.getElementById('fPrecioS').value) || parseFloat(document.getElementById('fPrecioC').value);
-  const el    = document.getElementById('fPresEquiv');
-  // Auto-sync campo Unidad
-  document.getElementById('fUnidad').value = unit;
-  // Show/hide peso-por-unidad only when presentación is in units
-  document.getElementById('fPresUnitWeightWrap').style.display = (unit === 'u') ? 'block' : 'none';
-  if (!qty || !precio) { el.textContent = ''; return; }
+  const qty    = parseFloat(document.getElementById('fPresQty').value);
+  const unit   = (document.getElementById('fPresUnit').value || '').trim();
+  const precio = parseFloat(document.getElementById('fPrecioC').value) || parseFloat(document.getElementById('fPrecioS').value);
+  const el     = document.getElementById('fPresEquiv');
+  const esDirecto = ['kg','g','L','ml'].includes(unit);
+  document.getElementById('fPresUnitWeightWrap').style.display = (!esDirecto && unit) ? 'block' : 'none';
+  if (!qty || !precio || !unit) { el.textContent = ''; return; }
   let costo, label;
-  if      (unit === 'kg') { costo = precio / qty;         label = '/kg'; }
-  else if (unit === 'g')  { costo = (precio / qty) * 1000; label = '/kg'; }
-  else if (unit === 'L')  { costo = precio / qty;         label = '/L';  }
-  else if (unit === 'ml') { costo = (precio / qty) * 1000; label = '/L';  }
+  if      (unit === 'kg') { costo = precio / qty;            label = '/kg'; }
+  else if (unit === 'g')  { costo = (precio / qty) * 1000;  label = '/kg'; }
+  else if (unit === 'L')  { costo = precio / qty;            label = '/L';  }
+  else if (unit === 'ml') { costo = (precio / qty) * 1000;  label = '/L';  }
   else {
-    const wt   = parseFloat(document.getElementById('fPresUnitWeight').value);
+    const wt    = parseFloat(document.getElementById('fPresUnitWeight').value);
     const wUnit = document.getElementById('fPresUnitWeightUnit').value;
-    if (wt && wUnit && wUnit !== 'u') {
-      const totalBase = qty * wt * (_UNIDAD_BASE[wUnit] || 1);
-      const baseLabel = (_typeOf(wUnit) === 'w') ? '/kg' : '/L';
-      const divisor   = (_typeOf(wUnit) === 'w') ? 1000 : 1000;
-      costo = (precio / totalBase) * divisor;
-      label = baseLabel;
+    const _N    = { kg: 1, g: 0.001, L: 1, ml: 0.001 };
+    if (wt && wUnit && _N[wUnit] !== undefined) {
+      const total = qty * wt * _N[wUnit];
+      const isVol = ['L','ml'].includes(wUnit);
+      costo = precio / total;
+      label = isVol ? '/L' : '/kg';
     } else {
-      costo = precio / qty; label = '/u';
+      costo = precio / qty; label = `/${unit}`;
     }
   }
   el.textContent = `= $${Math.round(costo).toLocaleString('es-AR')}${label}`;
@@ -1550,9 +1542,8 @@ function _onProvProductoChange() {
   document.getElementById('fPrecioS').value = precio.toFixed(2);
   document.getElementById('fPrecioC').value = '';
 
-  const presUnit = ['kg','L','g','ml'].includes(unidad) ? unidad : 'u';
   document.getElementById('fPresQty').value  = 1;
-  document.getElementById('fPresUnit').value = presUnit;
+  document.getElementById('fPresUnit').value = unidad;
   _updatePresEquiv();
 
   hint.style.color = 'var(--accent)';
@@ -1607,9 +1598,8 @@ function _aplicarBoletaItem(provId, itemInsumoId) {
 
   document.getElementById('fPrecioS').value = ultimo.precioUnitario.toFixed(2);
   document.getElementById('fPrecioC').value = '';
-  const presUnit = ['kg','L','g','ml'].includes(unidad) ? unidad : 'u';
   document.getElementById('fPresQty').value  = 1;
-  document.getElementById('fPresUnit').value = presUnit;
+  document.getElementById('fPresUnit').value = unidad;
   _updatePresEquiv();
 
   // También seleccioná el proveedor en el select

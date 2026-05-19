@@ -568,6 +568,7 @@ tbody td { padding: 10px 14px; vertical-align: middle; }
     </label>
     <button id="btnExtraer" class="btn btn-primary" onclick="extraerBoleta()" disabled>✦ Extraer con IA</button>
     <button id="btnConfirmar" class="btn btn-primary" onclick="confirmarBoleta()" style="display:none;background:var(--info)">✓ Confirmar y guardar</button>
+    <button id="btnDescartar" class="btn btn-outline" onclick="resetBoleta()" style="display:none;color:var(--danger);border-color:var(--danger)">✕ Descartar boleta</button>
   </div>
   <div id="boletaQueueBar" style="display:none;flex-direction:column;gap:6px;padding:10px 0">
     <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--ink2)">
@@ -2688,6 +2689,7 @@ function _bCargar(file) {
     document.getElementById('boletaPhotoWrap').innerHTML = `<img src="${ev.target.result}" alt="boleta">`;
     document.getElementById('btnExtraer').disabled = false;
     document.getElementById('btnConfirmar').style.display = 'none';
+    document.getElementById('btnDescartar').style.display = 'none';
     _bItems = [];
     document.getElementById('boletaItemsWrap').innerHTML =
       '<div style="color:var(--ink3);font-size:13px;padding:20px 0">Hacé click en "Extraer con IA" para procesar la imagen.</div>';
@@ -2784,6 +2786,7 @@ async function extraerBoleta() {
     document.getElementById('boletaDetected').style.display   = 'flex';
     document.getElementById('boletaDetectedProv').textContent = _bProvName || '—';
     document.getElementById('btnConfirmar').style.display     = 'inline-flex';
+    document.getElementById('btnDescartar').style.display     = 'inline-flex';
     toast(`${_bItems.length} ítems extraídos`, 'success');
   } catch(err) {
     toast('Error: ' + err.message, 'error');
@@ -2933,6 +2936,7 @@ function resetBoleta() {
   document.getElementById('boletaItemsWrap').innerHTML      = '<div style="color:var(--ink3);font-size:13px;padding:20px 0">Los ítems extraídos aparecen acá.</div>';
   document.getElementById('btnExtraer').disabled            = true;
   document.getElementById('btnConfirmar').style.display     = 'none';
+  document.getElementById('btnDescartar').style.display     = 'none';
   if (_bQueueResolve) { const r = _bQueueResolve; _bQueueResolve = null; r(); }
 }
 

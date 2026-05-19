@@ -1802,6 +1802,11 @@ function _precioPorBase(ins) {
     if (!total) return null;
     return { valor: precio / total, unidad: ['L','ml'].includes(ins.presUnitWeightUnit) ? '/L' : '/kg' };
   }
+  if (ins.presUnitWeight && ins.presUnitWeightUnit) {
+    const total = ins.presQty * ins.presUnitWeight;
+    if (!total) return null;
+    return { valor: precio / total, unidad: `/${ins.presUnitWeightUnit}` };
+  }
   const label = pu && pu !== 'u' ? `/${pu}` : '/u';
   return { valor: precio / ins.presQty, unidad: label };
 }

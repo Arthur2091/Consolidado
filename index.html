@@ -3542,22 +3542,9 @@ function deleteEgreso(id) {
 /* ── PRESENTACION / COSTO ───────────────────────────────────────── */
 function _fmtPres(ins) {
   if (!ins.presQty || !ins.presUnit) return '—';
-  const precio = ins.precioConIVA ?? ins.precioSinIVA;
-  if (!precio) return `${ins.presQty} ${ins.presUnit}`;
-  let costo, label;
-  if      (ins.presUnit === 'kg') { costo = precio / ins.presQty;          label = '/kg'; }
-  else if (ins.presUnit === 'g')  { costo = (precio / ins.presQty) * 1000; label = '/kg'; }
-  else if (ins.presUnit === 'L')  { costo = precio / ins.presQty;          label = '/L';  }
-  else if (ins.presUnit === 'ml') { costo = (precio / ins.presQty) * 1000; label = '/L';  }
-  else if (_typeOf(ins.presUnit) === 'u' && ins.presUnitWeight && ins.presUnitWeightUnit) {
-    const _N = { kg:1, g:0.001, L:1, ml:0.001 };
-    const totalNorm = ins.presQty * ins.presUnitWeight * (_N[ins.presUnitWeightUnit] || 1);
-    const isVol = ['L','ml'].includes(ins.presUnitWeightUnit);
-    costo = precio / totalNorm;
-    label = isVol ? '/L' : '/kg';
-  }
-  else                            { costo = precio / ins.presQty;          label = '/u';  }
-  return `${ins.presQty}${ins.presUnit} · $${Math.round(costo).toLocaleString('es-AR')}${label}`;
+  if (ins.presUnitWeight && ins.presUnitWeightUnit)
+    return `${ins.presQty}${ins.presUnit} · ${ins.presUnitWeight}${ins.presUnitWeightUnit}`;
+  return `${ins.presQty}${ins.presUnit}`;
 }
 
 // Base units in grams/ml/units — includes culinary measures

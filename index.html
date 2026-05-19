@@ -2633,17 +2633,41 @@ function saveEditFactura() {
   f.items        = _efItems.map(it => ({ ...it }));
   const prov = proveedores.find(p => p.id === provId);
   f.items.forEach(item => {
-    if (!item.peso_por_unidad || !item.unidad_peso) return;
     const mapping  = prov?.items?.find(pi => (pi.nombreBoleta||'').toLowerCase() === (item.nombre||'').toLowerCase());
     const insumoId = item.insumoId || mapping?.insumoId;
     if (!insumoId) return;
     const ins = insumos.find(i => i.id === insumoId);
-    if (ins && !ins.presUnitWeight) {
+    if (!ins) return;
+    // Propagar precio unitario (con IVA) corregido al insumo
+    if (item.precio_unitario != null) {
+      ins.precioConIVA = Number(item.precio_unitario);
+      ins.precioSinIVA = null;
+    }
+    // Propagar presentación si todavía no estaba seteada
+    if (item.peso_por_unidad && item.unidad_peso && !ins.presUnitWeight) {
       ins.presQty = 1; ins.presUnit = item.unidad || 'u';
       ins.presUnitWeight = item.peso_por_unidad; ins.presUnitWeightUnit = item.unidad_peso;
       ins.unidad = item.unidad_peso;
     }
   });
+  // Re-sincronizar historial de precios: borrar los precios de esta factura y re-crearlos con los valores corregidos
+  precios = precios.filter(p => p.nroBoleta !== f.nroBoleta || p.proveedorId !== provId);
+  f.items.forEach(item => {
+    if (item.precio_unitario == null) return;
+    const mapping  = prov?.items?.find(pi => (pi.nombreBoleta||'').toLowerCase() === (item.nombre||'').toLowerCase());
+    const insumoId = item.insumoId || mapping?.insumoId;
+    if (!insumoId) return;
+    precios.push({
+      id: crypto.randomUUID(), insumoId, proveedorId: provId,
+      fecha: f.fecha, nroBoleta: f.nroBoleta || null, nombreBoleta: item.nombre,
+      cantidad: item.cantidad, unidad: item.unidad,
+      pesoPorUnidad: item.peso_por_unidad ?? null, unidadPeso: item.unidad_peso ?? null,
+      precioUnitario: Number(item.precio_unitario),
+      precioTotal: item.precio_total != null ? Number(item.precio_total) : null,
+      fuente: 'edit',
+    });
+  });
+  renderInsumos();
   persist();
   closeModal('modalEditFactura');
   toast('Boleta actualizada', 'success');

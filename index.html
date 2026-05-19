@@ -2564,10 +2564,25 @@ function saveEditFactura() {
   f.hora         = document.getElementById('efHora').value;
   f.importeTotal = parseFloat(document.getElementById('efTotal').value) || null;
   f.items        = _efItems;
+  // Propagar peso al insumo si se cargó acá
+  const prov = proveedores.find(p => p.id === provId);
+  _efItems.forEach(item => {
+    if (!item.peso_por_unidad || !item.unidad_peso) return;
+    const mapping = prov?.items?.find(pi => (pi.nombreBoleta||'').toLowerCase() === (item.nombre||'').toLowerCase());
+    const insumoId = item.insumoId || mapping?.insumoId;
+    if (!insumoId) return;
+    const ins = insumos.find(i => i.id === insumoId);
+    if (ins && !ins.presUnitWeight) {
+      ins.presQty = 1; ins.presUnit = 'u';
+      ins.presUnitWeight = item.peso_por_unidad;
+      ins.presUnitWeightUnit = item.unidad_peso;
+      ins.unidad = item.unidad_peso;
+    }
+  });
   persist();
   closeModal('modalEditFactura');
   toast('Boleta actualizada', 'success');
-  renderProveedorFacturas(provId);
+  renderFacturaDetalle(facturaId, provId);
 }
 
 /* ── BOLETAS ────────────────────────────────────────────────────── */

@@ -2562,6 +2562,22 @@ function openEditFactura(facturaId, provId) {
 
 function _efEsc(s) { return String(s ?? '').replace(/"/g, '&quot;'); }
 function _efSet(i, field, val) { _efItems[i][field] = val; }
+
+function _efRecalc(i, field) {
+  _recalcPrecios(_efItems[i], field);
+  _efRefreshItems();
+}
+
+function _recalcPrecios(item, changed) {
+  const q = Number(item.cantidad);
+  const u = Number(item.precio_unitario);
+  const t = Number(item.precio_total);
+  if (changed === 'cantidad' || changed === 'precio_total') {
+    if (q > 0 && !isNaN(t) && t > 0) item.precio_unitario = Math.round((t / q) * 100) / 100;
+  } else if (changed === 'precio_unitario') {
+    if (q > 0 && !isNaN(u) && u > 0) item.precio_total = Math.round((u * q) * 100) / 100;
+  }
+}
 function _efRemove(i) { _efItems.splice(i, 1); _efRefreshItems(); }
 function _efAddItem() {
   _efItems.push({ nombre: '', cantidad: null, unidad: '', precio_total: null, precio_unitario: null, peso_por_unidad: null, unidad_peso: null, iva: null });
@@ -2585,7 +2601,9 @@ function _efRefreshItems() {
         <div>
           ${lbl('Cant.')}
           <input style="width:60px;font:13px var(--mono);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-            type="number" step="any" value="${it.cantidad??''}" oninput="_efSet(${i},'cantidad',this.value===''?null:parseFloat(this.value))">
+            type="text" inputmode="decimal" value="${it.cantidad??''}"
+            oninput="_efSet(${i},'cantidad',this.value===''?null:_parseNum(this.value))"
+            onchange="_efRecalc(${i},'cantidad')">
         </div>
         <div>
           ${lbl('Unidad')}
@@ -2610,12 +2628,16 @@ function _efRefreshItems() {
         <div>
           ${lbl('$ Unit.')}
           <input style="width:88px;font:13px var(--mono);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-            type="number" step="0.01" placeholder="0.00" value="${it.precio_unitario??''}" oninput="_efSet(${i},'precio_unitario',this.value===''?null:parseFloat(this.value))">
+            type="text" inputmode="decimal" placeholder="0,00" value="${it.precio_unitario??''}"
+            oninput="_efSet(${i},'precio_unitario',this.value===''?null:_parseNum(this.value))"
+            onchange="_efRecalc(${i},'precio_unitario')">
         </div>
         <div>
           ${lbl('$ Total')}
           <input style="width:88px;font:13px var(--mono);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-            type="number" step="0.01" placeholder="0.00" value="${it.precio_total??''}" oninput="_efSet(${i},'precio_total',this.value===''?null:parseFloat(this.value))">
+            type="text" inputmode="decimal" placeholder="0,00" value="${it.precio_total??''}"
+            oninput="_efSet(${i},'precio_total',this.value===''?null:_parseNum(this.value))"
+            onchange="_efRecalc(${i},'precio_total')">
         </div>
       </div>
     </div>`).join('');
@@ -2928,6 +2950,11 @@ async function extraerBoleta() {
 
 function _bSet(idx, field, val) { _bItems[idx][field] = val; }
 
+function _bRecalc(idx, field) {
+  _recalcPrecios(_bItems[idx], field);
+  _bRenderItems();
+}
+
 function _bRenderItems() {
   const wrap = document.getElementById('boletaItemsWrap');
   if (!_bItems.length) { wrap.innerHTML = '<div style="color:var(--ink3);font-size:13px;padding:20px 0">Sin ítems.</div>'; return; }
@@ -2939,9 +2966,10 @@ function _bRenderItems() {
           style="font:600 13px var(--font);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none;width:100%;box-sizing:border-box"
           oninput="_bSet(${idx},'nombre',this.value)">
         <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <input type="number" value="${item.cantidad??''}" placeholder="Cant."
+          <input type="text" inputmode="decimal" value="${item.cantidad??''}" placeholder="Cant."
             style="width:65px;font:13px var(--mono);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-            oninput="_bSet(${idx},'cantidad',parseFloat(this.value)||null)">
+            oninput="_bSet(${idx},'cantidad',this.value===''?null:_parseNum(this.value))"
+            onchange="_bRecalc(${idx},'cantidad')">
           <input type="text" value="${v(item.unidad)}" placeholder="Und."
             style="width:52px;font:13px var(--mono);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
             oninput="_bSet(${idx},'unidad',this.value)">
@@ -2951,12 +2979,14 @@ function _bRenderItems() {
           <input type="text" value="${v(item.unidad_peso)}" placeholder="u.peso"
             style="width:52px;font:13px var(--mono);padding:4px 7px;border:1.5px solid var(--info);border-radius:6px;background:#EFF6FF;outline:none"
             oninput="_bSet(${idx},'unidad_peso',this.value)">
-          <input type="number" step="0.01" value="${item.precio_unitario??''}" placeholder="$ Unit."
+          <input type="text" inputmode="decimal" value="${item.precio_unitario??''}" placeholder="$ Unit."
             style="flex:1;min-width:70px;font:13px var(--mono);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-            oninput="_bSet(${idx},'precio_unitario',this.value===''?null:parseFloat(this.value))">
-          <input type="number" step="0.01" value="${item.precio_total??''}" placeholder="$ Total"
+            oninput="_bSet(${idx},'precio_unitario',this.value===''?null:_parseNum(this.value))"
+            onchange="_bRecalc(${idx},'precio_unitario')">
+          <input type="text" inputmode="decimal" value="${item.precio_total??''}" placeholder="$ Total"
             style="flex:1;min-width:70px;font:13px var(--mono);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-            oninput="_bSet(${idx},'precio_total',this.value===''?null:parseFloat(this.value))">
+            oninput="_bSet(${idx},'precio_total',this.value===''?null:_parseNum(this.value))"
+            onchange="_bRecalc(${idx},'precio_total')">
         </div>
       </div>
       <button class="btn btn-ghost btn-sm" style="color:var(--danger);padding:4px 6px;align-self:start" onclick="_bItems.splice(${idx},1);_bRenderItems()">✕</button>

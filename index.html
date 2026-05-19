@@ -598,7 +598,10 @@ tbody td { padding: 10px 14px; vertical-align: middle; }
   <div id="boletaDetected" style="display:none;margin-bottom:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:none;gap:16px;align-items:center;flex-wrap:wrap">
     <div>
       <div style="font-size:11px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px">Proveedor detectado</div>
-      <div id="boletaDetectedProv" style="font-weight:600;font-size:15px"></div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <input id="boletaDetectedProv" type="text" style="font-weight:600;font-size:15px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none;min-width:200px" oninput="_bProvName=this.value" list="boletaProvDatalist">
+        <datalist id="boletaProvDatalist"></datalist>
+      </div>
       <div id="boletaDetectedStatus" style="font-size:12px;margin-top:2px"></div>
       <div id="boletaManualProvWrap" style="display:none;margin-top:8px;display:none;gap:8px;align-items:center">
         <input id="boletaManualProv" type="text" placeholder="Nombre del proveedor" style="padding:6px 10px;border:1.5px solid var(--info);border-radius:8px;font:14px var(--font);background:var(--surface);outline:none;width:200px">
@@ -2090,10 +2093,34 @@ function renderProveedores() {
               ${ultima ? ' · Última: ' + ultima.fecha : ''}
             </div>
           </button>
+          <button class="btn btn-outline btn-sm" onclick="renombrarProveedor('${p.id}')">Renombrar</button>
           <button class="btn btn-danger btn-sm" onclick="eliminarProveedor('${p.id}','${p.nombre}')">Eliminar</button>
         </div>`;
       }).join('')}
     </div>`;
+}
+
+function renombrarProveedor(id) {
+  const prov = proveedores.find(p => p.id === id);
+  if (!prov) return;
+  const nuevo = prompt('Nuevo nombre del proveedor:', prov.nombre);
+  if (nuevo == null) return;
+  const limpio = nuevo.trim();
+  if (!limpio) { toast('El nombre no puede estar vacío', 'error'); return; }
+  if (limpio === prov.nombre) return;
+  // Detectar conflicto con otro proveedor existente
+  const conflicto = proveedores.find(p => p.id !== id && _normProv(p.nombre) === _normProv(limpio));
+  if (conflicto) {
+    if (!confirm(`Ya existe un proveedor "${conflicto.nombre}". ¿Fusionar "${prov.nombre}" en "${conflicto.nombre}"?`)) return;
+    _mergeProvPair(conflicto.id, id);
+    persist(); renderProveedores();
+    toast('Proveedores fusionados', 'success');
+    return;
+  }
+  (prov.aliases = prov.aliases || []).push(prov.nombre);
+  prov.nombre = limpio;
+  persist(); renderProveedores();
+  toast('Proveedor renombrado', 'success');
 }
 
 function eliminarProveedor(id, nombre) {
@@ -2717,8 +2744,15 @@ function _confirmarNuevoProv() {
   if (!nombre) { toast('Ingresá o seleccioná un proveedor', 'error'); return; }
   _bProvName = nombre;
   document.getElementById('boletaNewProvBanner').style.display = 'none';
-  document.getElementById('boletaDetectedProv').textContent = _bProvName;
+  document.getElementById('boletaDetectedProv').value = _bProvName;
+  _bRefreshProvDatalist();
   document.getElementById('boletaDetected').style.display = 'flex';
+}
+
+function _bRefreshProvDatalist() {
+  const dl = document.getElementById('boletaProvDatalist');
+  if (!dl) return;
+  dl.innerHTML = proveedores.map(p => `<option value="${p.nombre.replace(/"/g,'&quot;')}">`).join('');
 }
 
 function _saltearBoleta() {
@@ -2824,7 +2858,8 @@ async function extraerBoleta() {
 
     _bRenderItems();
     document.getElementById('boletaDetected').style.display   = 'flex';
-    document.getElementById('boletaDetectedProv').textContent = _bProvName || '—';
+    document.getElementById('boletaDetectedProv').value = _bProvName || '';
+    _bRefreshProvDatalist();
     document.getElementById('btnConfirmar').style.display     = 'inline-flex';
     document.getElementById('btnDescartar').style.display     = 'inline-flex';
     toast(`${_bItems.length} ítems extraídos`, 'success');

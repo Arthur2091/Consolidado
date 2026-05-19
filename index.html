@@ -533,6 +533,7 @@ tbody td { padding: 10px 14px; vertical-align: middle; }
           <th style="text-align:right">Precio C/IVA</th>
           <th style="text-align:right">Precio S/IVA</th>
           <th>Presentación</th>
+          <th style="text-align:right">$/kg · $/L</th>
           <th>Observaciones</th>
           <th>Proveedores</th>
           <th></th>
@@ -1795,6 +1796,24 @@ function fmt(n) {
   return '$' + n.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 }
 
+function _precioPorBase(ins) {
+  const precio = ins.precioConIVA ?? ins.precioSinIVA;
+  if (!precio || !ins.presQty) return null;
+  const _N = { kg: 1, g: 0.001, L: 1, ml: 0.001 };
+  const pu = ins.presUnit || 'u';
+  if (_N[pu] !== undefined) {
+    const total = ins.presQty * _N[pu];
+    if (!total) return null;
+    return { valor: precio / total, unidad: ['L','ml'].includes(pu) ? '/L' : '/kg' };
+  }
+  if (ins.presUnitWeight && ins.presUnitWeightUnit && _N[ins.presUnitWeightUnit] !== undefined) {
+    const total = ins.presQty * ins.presUnitWeight * _N[ins.presUnitWeightUnit];
+    if (!total) return null;
+    return { valor: precio / total, unidad: ['L','ml'].includes(ins.presUnitWeightUnit) ? '/L' : '/kg' };
+  }
+  return null;
+}
+
 function renderInsumos() {
   const search    = document.getElementById('searchInsumos').value.toLowerCase();
   const catFilter = document.getElementById('filterCat').value;
@@ -1832,7 +1851,7 @@ function renderInsumos() {
   const tbody = document.getElementById('tbodyInsumos');
 
   if (visible.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7">
+    tbody.innerHTML = `<tr><td colspan="9">
       <div class="empty-state">
         ${insumos.length === 0
           ? `<h3>Sin insumos</h3>
@@ -1868,7 +1887,7 @@ function renderInsumos() {
     .forEach(([provNombre, items]) => {
       rows.push(`
         <tr class="cat-row">
-          <td colspan="8">${provNombre} <span style="font-weight:400;color:var(--ink3)">(${items.length})</span></td>
+          <td colspan="9">${provNombre} <span style="font-weight:400;color:var(--ink3)">(${items.length})</span></td>
         </tr>`);
 
       items.sort((a,b) => a.nombre.localeCompare(b.nombre, 'es')).forEach(i => {
@@ -1879,6 +1898,7 @@ function renderInsumos() {
             <td class="mono price-civa" style="text-align:right">${i.precioConIVA != null ? fmt(i.precioConIVA) : i.precioSinIVA != null ? `<span style="color:var(--ink3)" title="Estimado: S/IVA × 1.21">${fmt(Math.round(i.precioSinIVA * 1.21 * 100)/100)} <span style="font-size:10px">~</span></span>` : '—'}</td>
             <td class="mono price-siva" style="text-align:right">${i.precioSinIVA != null ? fmt(i.precioSinIVA) : i.precioConIVA != null ? `<span style="color:var(--ink3)" title="Estimado: C/IVA ÷ 1.21">${fmt(Math.round(i.precioConIVA / 1.21 * 100)/100)} <span style="font-size:10px">~</span></span>` : '—'}</td>
             <td style="font-size:12px;color:var(--ink2);font-family:'DM Mono',monospace">${_fmtPres(i)}</td>
+            <td class="mono" style="text-align:right;font-size:12px">${(() => { const pb = _precioPorBase(i); return pb ? `<strong>${fmt(Math.round(pb.valor))}</strong><span style="color:var(--ink3);font-size:10px">${pb.unidad}</span>` : '—'; })()}</td>
             <td style="color:var(--ink3);font-size:12px;max-width:200px">${i.observaciones || ''}</td>
             <td></td>
             <td style="white-space:nowrap">

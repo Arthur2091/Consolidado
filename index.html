@@ -2477,9 +2477,10 @@ function renderFacturaDetalle(facturaId, provId) {
               ${cantLine}${pesoLine}${ivaLine}
             </div>
           </div>
-          <div style="text-align:right;flex-shrink:0">
+          <div style="text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:4px">
             <div style="font-weight:700;font-size:.95rem">${item.precio_total != null ? pesos(item.precio_total) : '—'}</div>
             ${puLabel ? `<div style="font-size:.72rem;color:var(--ink3)">${puLabel}</div>` : ''}
+            <button onclick="openEditFactura('${facturaId}','${provId}')" style="font-size:11px;padding:2px 8px;background:none;border:1px solid var(--border);border-radius:6px;color:var(--ink3);cursor:pointer;white-space:nowrap">Editar</button>
           </div>
         </div>`;}).join('')}
     </div>`;
@@ -2586,21 +2587,12 @@ function saveEditFactura() {
 }
 
 /* ── BOLETAS ────────────────────────────────────────────────────── */
-let _boletaImageB64   = null;
-let _boletaImageMime  = null;
-let _boletaFotoNombre = null;
-let _boletaItems      = [];
-let _boletaProvId     = null;
-let _boletaProvNombre = null;
-let _boletaQueue        = [];
-let _boletaQueueRunning = false;
-let _boletaQueueResolve = null;
-let _boletaProvResolve  = null;
-let _boletaProvReject   = null;
+let _bImg64 = null, _bImgMime = null, _bFile = null;
+let _bItems = [], _bProvId = null, _bProvName = null;
 
 function saveApiKey() {
   const key = document.getElementById('apikeyInput').value.trim();
-  if (!key.startsWith('sk-ant-')) { toast('Key inválida — debe empezar con sk-ant-', 'error'); return; }
+  if (!key.startsWith('sk-ant-')) { toast('Key inválida', 'error'); return; }
   localStorage.setItem('cons_apikey', key);
   _fbWrite('config', { rubros: _customRubros, margen_obj: parseFloat(localStorage.getItem('cons_margen_obj')) || 0, costos_extra: parseFloat(localStorage.getItem('cons_costos_extra')) || 0, apikey: key }).catch(() => {});
   document.getElementById('apikeyBanner').style.display = 'none';
@@ -2612,126 +2604,37 @@ function getApiKey() { return localStorage.getItem('cons_apikey') || ''; }
 function initBoletasView() {
   document.getElementById('apikeyBanner').style.display = getApiKey() ? 'none' : 'flex';
   document.getElementById('boletaFecha').value = new Date().toISOString().slice(0,10);
-  renderBoletaHistorial();
 }
 
 function onBoletaFoto(e) {
   const files = Array.from(e.target.files);
   e.target.value = '';
   if (!files.length) return;
-
-  const archivosSubidos = JSON.parse(localStorage.getItem('boletaArchivos') || '[]');
-  const limpios = files.filter(f => !archivosSubidos.includes(f.name));
-  const duplicados = files.filter(f => archivosSubidos.includes(f.name));
-
-  if (duplicados.length) {
-    const nombres = duplicados.map(f => `"${f.name}"`).join(', ');
-    document.getElementById('boletaDupText').textContent = `${nombres} ya ${duplicados.length === 1 ? 'fue subido' : 'fueron subidos'} antes.`;
-    document.getElementById('boletaDupBanner').style.display = 'flex';
-    document.getElementById('boletaDupBanner').dataset.limpios  = JSON.stringify(limpios.map(f => f.name));
-    document.getElementById('boletaDupBanner').dataset.todos    = JSON.stringify(files.map(f => f.name));
-    window._boletaFilesPending = { limpios, duplicados, todos: files };
-    return;
-  }
-
-  _despacharBoletas(files);
+  _bCargar(files[0]);
 }
 
-function _despacharBoletas(files) {
-  document.getElementById('boletaDupBanner').style.display = 'none';
-  if (files.length === 1) _cargarBoletaManual(files[0]);
-  else _iniciarColaBoletas(files);
-}
-
-function _confirmarDuplicado() {
-  const p = window._boletaFilesPending;
-  if (p) _despacharBoletas(p.todos);
-}
-
-function _cancelarDuplicado() {
-  const p = window._boletaFilesPending;
-  document.getElementById('boletaDupBanner').style.display = 'none';
-  if (p?.limpios?.length) _despacharBoletas(p.limpios);
-  window._boletaFilesPending = null;
-}
-
-function _cargarBoletaManual(file) {
-  _boletaFotoNombre = file.name;
-  _boletaImageMime  = file.type;
+function _bCargar(file) {
+  _bFile = file.name; _bImgMime = file.type;
   const reader = new FileReader();
   reader.onload = ev => {
-    _boletaImageB64 = ev.target.result.split(',')[1];
+    _bImg64 = ev.target.result.split(',')[1];
     document.getElementById('boletaPhotoWrap').innerHTML = `<img src="${ev.target.result}" alt="boleta">`;
     document.getElementById('btnExtraer').disabled = false;
-    _boletaItems = [];
+    document.getElementById('btnConfirmar').style.display = 'none';
+    _bItems = [];
     document.getElementById('boletaItemsWrap').innerHTML =
       '<div style="color:var(--ink3);font-size:13px;padding:20px 0">Hacé click en "Extraer con IA" para procesar la imagen.</div>';
-    document.getElementById('btnConfirmar').style.display = 'none';
   };
   reader.readAsDataURL(file);
 }
 
-function _iniciarColaBoletas(files) {
-  _boletaQueue = files;
-  _boletaQueueRunning = true;
-  document.getElementById('btnExtraer').disabled = true;
-  document.getElementById('boletaQueueBar').style.display = 'flex';
-  _procesarColaBoletas(0, 0, []);
-}
+function _confirmarDuplicado() {}
+function _cancelarDuplicado() {}
+function _onProvSelectChange() {}
+function _confirmarNuevoProv() {}
+function _saltearBoleta() {}
 
-async function _procesarColaBoletas(idx, ok, errores) {
-  const total = _boletaQueue.length;
-  if (idx >= total) {
-    _boletaQueueRunning = false;
-    document.getElementById('boletaQueueBar').style.display = 'none';
-    document.getElementById('btnExtraer').disabled = true;
-    toast(`Cola finalizada — ${ok} guardadas${errores.length ? `, ${errores.length} errores` : ''}`, errores.length ? 'warn' : 'success');
-    if (errores.length) {
-      const lista = errores.map(n => `• ${n}`).join('\n');
-      const wrap = document.getElementById('boletaItemsWrap');
-      wrap.innerHTML = `<div style="padding:16px;background:var(--danger-light);border-radius:var(--radius);border:1px solid var(--danger)">
-        <div style="font-weight:600;color:var(--danger);margin-bottom:8px">No se pudieron procesar (${errores.length}):</div>
-        ${errores.map(n => `<div style="font-size:13px;color:var(--danger);padding:2px 0">• ${n}</div>`).join('')}
-      </div>`;
-    }
-    return;
-  }
-
-  const file = _boletaQueue[idx];
-  const pct = Math.round((idx / total) * 100);
-  document.getElementById('boletaQueueProgress').style.width = pct + '%';
-  document.getElementById('boletaQueueText').textContent = file.name;
-  document.getElementById('boletaQueueCount').textContent = `${idx + 1} / ${total}`;
-  document.getElementById('boletaQueueStep').textContent = 'Enviando a IA…';
-
-  const result = await _extraerYGuardar(file);
-  if (result) ok++; else errores.push(file.name);
-
-  document.getElementById('boletaQueueStep').textContent = result ? '✓ Guardada' : '✗ Error';
-  document.getElementById('boletaQueueProgress').style.width = Math.round(((idx + 1) / total) * 100) + '%';
-  _procesarColaBoletas(idx + 1, ok, errores);
-}
-
-function _loadFileB64(file) {
-  return new Promise(resolve => {
-    const reader = new FileReader();
-    reader.onload = ev => resolve(ev.target.result);
-    reader.readAsDataURL(file);
-  });
-}
-
-async function _extraerYGuardar(file) {
-  const apiKey = getApiKey();
-  if (!apiKey) return false;
-
-  _boletaFotoNombre = file.name;
-  const dataUrl = await _loadFileB64(file);
-  const b64  = dataUrl.split(',')[1];
-  const mime = file.type;
-
-  document.getElementById('boletaPhotoWrap').innerHTML = `<img src="${dataUrl}" alt="boleta">`;
-
-  const prompt = `Analizá esta boleta/factura de proveedor y extraé la siguiente información.
+const _BPROMPT = `Analizá esta boleta/factura de proveedor y extraé la siguiente información.
 
 Respondé ÚNICAMENTE con JSON válido, sin texto adicional ni markdown, con esta estructura exacta:
 {
@@ -2744,10 +2647,10 @@ Respondé ÚNICAMENTE con JSON válido, sin texto adicional ni markdown, con est
     {
       "nombre": "nombre del producto exactamente como aparece en la boleta",
       "cantidad": número de unidades facturadas o null,
-      "unidad": "unidad de compra: kg, g, L, ml, un, caja, etc. Si el nombre menciona el peso (ej: 'HARINA 25KG'), usá esa unidad. NO uses 'BL', 'BTO' ni genéricos si podés determinar la unidad real.",
-      "peso_por_unidad": "si cada unidad tiene un peso o volumen propio (ej: '1 un 6,5 kg' → 6.5 ; '6 x 500g' → 500 ; 'manteca 25kg c/u' → 25), extraé ese número. Si la unidad de compra ya es kg/g/L/ml, ponés null. Si el nombre del producto menciona un peso/volumen por unidad aunque la boleta no lo tenga como campo separado, extraélo igual.",
-      "unidad_peso": "unidad del peso_por_unidad: 'kg', 'g', 'L', 'ml'. null si peso_por_unidad es null.",
-      "iva": tasa de IVA en porcentaje como número (ej: 21, 10.5, 0) o null si no se ve,
+      "unidad": "unidad de compra: kg, g, L, ml, un, caja, etc.",
+      "peso_por_unidad": número si cada unidad tiene peso propio (ej: manteca 25kg → 25), si no null,
+      "unidad_peso": "'kg', 'g', 'L' o 'ml'. null si peso_por_unidad es null.",
+      "iva": tasa de IVA como número o null,
       "precio_unitario": número sin símbolo o null,
       "precio_total": número sin símbolo o null
     }
@@ -2756,459 +2659,127 @@ Respondé ÚNICAMENTE con JSON válido, sin texto adicional ni markdown, con est
 
 Si no podés leer algún campo con certeza, ponés null.`;
 
-  const body = JSON.stringify({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 2048,
-    messages: [{ role: 'user', content: [
-      { type: 'image', source: { type: 'base64', media_type: mime, data: b64 } },
-      { type: 'text', text: prompt }
-    ]}]
+async function _bCallIA(b64, mime) {
+  const apiKey = getApiKey();
+  if (!apiKey) throw new Error('Sin API key');
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6', max_tokens: 4096,
+      messages: [{ role: 'user', content: [
+        { type: 'image', source: { type: 'base64', media_type: mime, data: b64 } },
+        { type: 'text', text: _BPROMPT }
+      ]}]
+    }),
   });
-
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
-  let parsed;
-  try {
-    let data;
-    for (let attempt = 1; attempt <= 4; attempt++) {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-        body,
-      });
-      if (res.status === 529) {
-        if (attempt < 4) { await sleep(attempt * 8000); continue; }
-        return false;
-      }
-      if (!res.ok) return false;
-      data = await res.json();
-      break;
-    }
-    const text = data.content[0].text.trim();
-    parsed = JSON.parse(text.replace(/^```json?\n?/, '').replace(/\n?```$/, '').trim());
-  } catch { return false; }
-
-  if (!parsed?.items?.length || !parsed?.proveedor) return false;
-  const fecha = parsed.fecha || new Date().toISOString().slice(0, 10);
-
-  const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-  let prov = proveedores.find(p => {
-    const aliases = p.aliases || [];
-    return norm(p.nombre).includes(norm(parsed.proveedor)) ||
-           norm(parsed.proveedor).includes(norm(p.nombre)) ||
-           aliases.some(a => norm(a) === norm(parsed.proveedor));
-  });
-  if (!prov) {
-    let confirmado;
-    try { confirmado = await _pedirNuevoProv(parsed.proveedor); } catch { return false; }
-    if (confirmado && typeof confirmado === 'object' && confirmado.id) {
-      prov = proveedores.find(p => p.id === confirmado.id);
-      if (prov) {
-        if (!prov.aliases) prov.aliases = [];
-        if (!prov.aliases.includes(parsed.proveedor)) prov.aliases.push(parsed.proveedor);
-      }
-    } else {
-      prov = { id: crypto.randomUUID(), nombre: String(confirmado).toUpperCase(), telefono: '', email: '', notas: '', pago: 'transferencia', items: [], aliases: [parsed.proveedor] };
-      proveedores.push(prov);
-      toast(`Proveedor "${prov.nombre}" dado de alta`, 'success');
-    }
-  } else {
-    if (!prov.aliases) prov.aliases = [];
-    if (!prov.aliases.includes(parsed.proveedor) && norm(prov.nombre) !== norm(parsed.proveedor)) {
-      prov.aliases.push(parsed.proveedor);
-    }
-  }
-
-  // Pre-register item names in prov.items for mapping (no save yet — confirmarBoleta saves everything)
-  parsed.items.forEach(item => {
-    if (item.nombre) {
-      const exists = prov.items.some(it => it.nombreBoleta.toLowerCase() === item.nombre.toLowerCase());
-      if (!exists) prov.items.push({ id: crypto.randomUUID(), nombreBoleta: item.nombre, insumoId: null, unidad: item.unidad || '' });
-    }
-  });
-
-  _boletaProvId = prov.id;
-  _boletaProvNombre = parsed.proveedor || null;
-  _boletaItems = parsed.items.map(it => {
-    if (it.precio_total == null && it.precio_unitario != null && it.cantidad != null) {
-      it.precio_total = it.peso_por_unidad
-        ? Math.round(it.cantidad * it.peso_por_unidad * it.precio_unitario * 100) / 100
-        : Math.round(it.cantidad * it.precio_unitario * 100) / 100;
-    }
-    return it;
-  });
-  renderBoletaItems();
-
-  document.getElementById('btnConfirmar').style.display = '';
-  if (_boletaQueueRunning) {
-    document.getElementById('boletaQueueStep').textContent = 'Revisá y confirmá ↓';
-    return new Promise(resolve => { _boletaQueueResolve = resolve; });
-  }
-  return true;
-}
-
-function _pedirNuevoProv(nombreDetectado) {
-  return new Promise((resolve, reject) => {
-    _boletaProvResolve = resolve;
-    _boletaProvReject  = reject;
-    const sel = document.getElementById('boletaProvSelect');
-    sel.innerHTML = '<option value="">— Crear nuevo —</option>';
-    [...proveedores].sort((a,b) => a.nombre.localeCompare(b.nombre,'es'))
-      .forEach(p => { const o = document.createElement('option'); o.value = p.id; o.textContent = p.nombre; sel.appendChild(o); });
-    sel.value = '';
-    document.getElementById('boletaNewProvInput').value = nombreDetectado || '';
-    document.getElementById('boletaNewProvInput').style.display = '';
-    document.getElementById('boletaNewProvBanner').style.display = 'flex';
-    document.getElementById('boletaQueueText').textContent = 'En espera…';
-  });
-}
-
-function _onProvSelectChange() {
-  const sel = document.getElementById('boletaProvSelect');
-  document.getElementById('boletaNewProvInput').style.display = sel.value ? 'none' : '';
-}
-
-function _confirmarNuevoProv() {
-  const sel    = document.getElementById('boletaProvSelect');
-  const nombre = document.getElementById('boletaNewProvInput').value.trim();
-  if (!sel.value && !nombre) { toast('Seleccioná un proveedor o ingresá un nombre nuevo', 'error'); return; }
-  document.getElementById('boletaNewProvBanner').style.display = 'none';
-  if (_boletaProvResolve) {
-    _boletaProvResolve(sel.value ? { id: sel.value } : nombre);
-    _boletaProvResolve = null;
-  }
-}
-
-function _saltearBoleta() {
-  document.getElementById('boletaNewProvBanner').style.display = 'none';
-  if (_boletaProvReject) { _boletaProvReject('skip'); _boletaProvReject = null; }
-}
-
-function _registrarArchivoSubido(nombre) {
-  const archivos = JSON.parse(localStorage.getItem('boletaArchivos') || '[]');
-  if (!archivos.includes(nombre)) {
-    archivos.push(nombre);
-    localStorage.setItem('boletaArchivos', JSON.stringify(archivos));
-  }
+  if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error?.message || res.statusText); }
+  const data = await res.json();
+  const text = data.content[0].text.trim().replace(/^```json?\n?/, '').replace(/\n?```$/, '').trim();
+  return JSON.parse(text);
 }
 
 async function extraerBoleta() {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    document.getElementById('apikeyBanner').style.display = 'flex';
-    toast('Necesitás configurar la API key primero', 'error');
-    return;
-  }
-  if (!_boletaImageB64) { toast('Subí la foto primero', 'error'); return; }
+  if (!getApiKey()) { document.getElementById('apikeyBanner').style.display = 'flex'; toast('Configurá la API key primero', 'error'); return; }
+  if (!_bImg64)     { toast('Subí la foto primero', 'error'); return; }
 
-  // Show spinner
-  const wrap = document.getElementById('boletaPhotoWrap');
-  wrap.innerHTML += `
-    <div class="extracting-overlay">
-      <div class="spinner"></div>
-      Analizando boleta…
-    </div>`;
   document.getElementById('btnExtraer').disabled = true;
-  document.getElementById('boletaItemsWrap').innerHTML =
-    '<div style="color:var(--ink3);font-size:13px;padding:20px 0">Extrayendo ítems…</div>';
-
-  const prompt = `Analizá esta boleta/factura de proveedor y extraé la siguiente información.
-
-Respondé ÚNICAMENTE con JSON válido, sin texto adicional ni markdown, con esta estructura exacta:
-{
-  "proveedor": "nombre del proveedor tal como aparece en la boleta",
-  "fecha": "fecha de la boleta en formato YYYY-MM-DD, o null si no se ve",
-  "hora": "hora de la boleta en formato HH:MM, o null si no se ve",
-  "nro_boleta": "número de comprobante/boleta/factura tal como aparece, o null si no se ve",
-  "importe_total": número total de la boleta sin símbolo de moneda, o null si no se ve,
-  "items": [
-    {
-      "nombre": "nombre del producto exactamente como aparece en la boleta",
-      "cantidad": número de unidades facturadas o null,
-      "unidad": "unidad de compra: kg, g, L, ml, un, caja, etc. Si el nombre menciona el peso (ej: 'HARINA 25KG'), usá esa unidad. NO uses 'BL', 'BTO' ni genéricos si podés determinar la unidad real.",
-      "peso_por_unidad": "si cada unidad tiene un peso o volumen propio (ej: '1 un 6,5 kg' → 6.5 ; '6 x 500g' → 500), extraé ese número. Si la unidad de compra ya es kg/g/L/ml, ponés null.",
-      "unidad_peso": "unidad del peso_por_unidad: 'kg', 'g', 'L', 'ml'. null si peso_por_unidad es null.",
-      "iva": tasa de IVA en porcentaje como número (ej: 21, 10.5, 0) o null si no se ve,
-      "precio_unitario": número sin símbolo o null,
-      "precio_total": número sin símbolo o null
-    }
-  ]
-}
-
-Si no podés leer algún campo con certeza, ponés null.`;
-
-  const body = JSON.stringify({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 4096,
-    messages: [{
-      role: 'user',
-      content: [
-        { type: 'image', source: { type: 'base64', media_type: _boletaImageMime, data: _boletaImageB64 } },
-        { type: 'text', text: prompt }
-      ]
-    }]
-  });
-
-  const sleep = ms => new Promise(r => setTimeout(r, ms));
+  document.getElementById('boletaItemsWrap').innerHTML = '<div style="color:var(--ink3);font-size:13px;padding:20px 0">Analizando…</div>';
 
   try {
-    let data, lastErr;
-    for (let attempt = 1; attempt <= 4; attempt++) {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-        body,
-      });
+    const parsed = await _bCallIA(_bImg64, _bImgMime);
+    _bItems    = parsed.items || [];
+    _bProvName = parsed.proveedor || null;
 
-      if (res.status === 529) {
-        const wait = attempt * 8;
-        const overlay = document.querySelector('.extracting-overlay');
-        if (overlay) overlay.querySelector('div:last-child').textContent = `API saturada — reintentando en ${wait}s (${attempt}/3)…`;
-        if (attempt < 4) { await sleep(wait * 1000); continue; }
-        throw new Error('API de Anthropic saturada. Intentá en unos minutos.');
-      }
+    if (parsed.fecha)         { const el = document.getElementById('boletaFecha');     if (!el.value) el.value = parsed.fecha; }
+    if (parsed.nro_boleta)    { const el = document.getElementById('boletaNumero');    if (!el.value) el.value = parsed.nro_boleta; }
+    if (parsed.hora)          document.getElementById('boletaHora').textContent         = parsed.hora;
+    if (parsed.importe_total) document.getElementById('boletaImporteTotal').textContent = `Total: ${pesos(parsed.importe_total)}`;
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error?.message || res.statusText);
-      }
-
-      data = await res.json();
-      break;
-    }
-    if (data.stop_reason === 'max_tokens') throw new Error('Respuesta truncada (boleta muy larga). Intentá con una imagen más clara o de menor tamaño.');
-    const text = data.content[0].text.trim();
-    const jsonStr = text.replace(/^```json?\n?/, '').replace(/\n?```$/, '').trim();
-    let parsed;
-    try { parsed = JSON.parse(jsonStr); } catch(e) { throw new Error('No se pudo parsear la respuesta de la IA. Respuesta: ' + text.slice(0,200)); }
-
-    _boletaItems = (parsed.items || []).map(it => {
-      if (it.precio_total == null && it.precio_unitario != null && it.cantidad != null) {
-        it.precio_total = it.peso_por_unidad
-          ? Math.round(it.cantidad * it.peso_por_unidad * it.precio_unitario * 100) / 100
-          : Math.round(it.cantidad * it.precio_unitario * 100) / 100;
-      }
-      return it;
-    });
-    _boletaProvNombre = parsed.proveedor || null;
-
-    if (parsed.fecha) {
-      const f = document.getElementById('boletaFecha');
-      if (!f.value) f.value = parsed.fecha;
-    }
-    if (parsed.nro_boleta) {
-      const n = document.getElementById('boletaNumero');
-      if (!n.value) n.value = parsed.nro_boleta;
-    }
-    if (parsed.importe_total) {
-      document.getElementById('boletaImporteTotal').textContent = `Total: ${pesos(parsed.importe_total)}`;
-    }
-    if (parsed.hora) {
-      document.getElementById('boletaHora').textContent = parsed.hora;
-    }
-
-    // Match or prepare new provider
-    resolveProveedor(_boletaProvNombre);
-    renderBoletaItems();
-    document.getElementById('btnConfirmar').style.display = 'inline-flex';
-    toast(`${_boletaItems.length} ítems extraídos`, 'success');
-
+    _bRenderItems();
+    document.getElementById('boletaDetected').style.display   = 'flex';
+    document.getElementById('boletaDetectedProv').textContent = _bProvName || '—';
+    document.getElementById('btnConfirmar').style.display     = 'inline-flex';
+    toast(`${_bItems.length} ítems extraídos`, 'success');
   } catch(err) {
     toast('Error: ' + err.message, 'error');
-    document.getElementById('boletaItemsWrap').innerHTML =
-      `<div style="color:var(--danger);font-size:13px;padding:20px 0">❌ ${err.message}</div>`;
+    document.getElementById('boletaItemsWrap').innerHTML = `<div style="color:var(--danger);font-size:13px;padding:20px 0">❌ ${err.message}</div>`;
   } finally {
-    // Remove spinner
-    const overlay = wrap.querySelector('.extracting-overlay');
-    if (overlay) overlay.remove();
     document.getElementById('btnExtraer').disabled = false;
   }
 }
 
-function resolveProveedor(nombre) {
-  const panel = document.getElementById('boletaDetected');
-  const labelEl = document.getElementById('boletaDetectedProv');
-  const statusEl = document.getElementById('boletaDetectedStatus');
-
-  if (!nombre) {
-    _boletaProvId = null;
-    labelEl.textContent = 'No detectado';
-    statusEl.innerHTML = '<span style="color:var(--warn)">⚠ Ingresá el nombre antes de confirmar</span>';
-    panel.style.display = 'flex';
-    document.getElementById('boletaManualProvWrap').style.display = 'flex';
-    document.getElementById('boletaManualProv').value = '';
-    return;
-  }
-  document.getElementById('boletaManualProvWrap').style.display = 'none';
-
-  // Try to match existing provider (case-insensitive, partial)
-  const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-  const match = proveedores.find(p =>
-    norm(p.nombre).includes(norm(nombre)) || norm(nombre).includes(norm(p.nombre))
-  );
-
-  labelEl.textContent = nombre;
-  panel.style.display = 'flex';
-
-  if (match) {
-    _boletaProvId = match.id;
-    statusEl.innerHTML = `<span style="color:var(--accent)">✓ Reconocido — ${match.nombre}</span>`;
-  } else {
-    _boletaProvId = null;
-    statusEl.innerHTML = `<span style="color:var(--info)">Proveedor nuevo — se va a dar de alta automáticamente</span>`;
-  }
-}
-
-function renderBoletaItems() {
-  const prov = _boletaProvId ? proveedores.find(p => p.id === _boletaProvId) : null;
-
+function _bRenderItems() {
   const wrap = document.getElementById('boletaItemsWrap');
-  if (!_boletaItems.length) {
-    wrap.innerHTML = '<div style="color:var(--ink3);font-size:13px;padding:20px 0">Sin ítems.</div>';
-    return;
-  }
-
-  // Build insumo options (for unmapped items)
-  const cats = [...new Set(insumos.map(i => i.categoria))].sort();
-  const optGroups = cats.map(cat => {
-    const opts = insumos
-      .filter(i => i.categoria === cat)
-      .sort((a,b) => a.nombre.localeCompare(b.nombre,'es'))
-      .map(i => `<option value="${i.id}">${i.nombre}</option>`)
-      .join('');
-    return `<optgroup label="${cat}">${opts}</optgroup>`;
-  }).join('');
-  const selOpts = `<option value="">— Sin mapear —</option>${optGroups}`;
-
-  const inp = (field, val, type='text', ph='') =>
-    `<input type="${type}" value="${String(val??'').replace(/"/g,'&quot;')}" placeholder="${ph}"
-      style="font:${type==='number'?'13px var(--mono)':'13px var(--font)'};padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none;width:100%;box-sizing:border-box"
-      oninput="_boletaSet(${wrap._idx??0},this,'${field}',${type==='number'})">`;
-
-  wrap._idx = 0;
-  wrap.innerHTML = _boletaItems.map((item, idx) => {
-    wrap._idx = idx;
-    const mapping = prov?.items?.find(it => it.nombreBoleta?.toLowerCase() === item.nombre?.toLowerCase());
-    const insumo  = mapping ? insumos.find(i => i.id === mapping.insumoId) : null;
-    const curInsumoId = item._insumoId || mapping?.insumoId || '';
-
-    return `
-      <div class="boleta-item-row" style="grid-template-columns:1fr auto">
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <input type="text" value="${String(item.nombre??'').replace(/"/g,'&quot;')}" placeholder="Nombre"
-            style="font:600 13px var(--font);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none;width:100%;box-sizing:border-box"
-            oninput="_boletaSet(${idx},this,'nombre',false)">
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <input type="number" value="${item.cantidad??''}" placeholder="Cant."
-              style="width:65px;font:13px var(--mono);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-              oninput="_boletaSet(${idx},this,'cantidad',true)">
-            <input type="text" value="${item.unidad??''}" placeholder="Und."
-              style="width:52px;font:13px var(--mono);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-              oninput="_boletaSet(${idx},this,'unidad',false)">
-            <input type="number" step="0.01" value="${item.peso_por_unidad??''}" placeholder="Peso/u"
-              style="width:70px;font:13px var(--mono);padding:4px 7px;border:1.5px solid var(--info);border-radius:6px;background:#EFF6FF;outline:none"
-              oninput="_boletaSet(${idx},this,'peso_por_unidad',true)" title="Peso o volumen por unidad (ej: 6.5)">
-            <input type="text" value="${item.unidad_peso??''}" placeholder="u.peso"
-              style="width:52px;font:13px var(--mono);padding:4px 7px;border:1.5px solid var(--info);border-radius:6px;background:#EFF6FF;outline:none"
-              oninput="_boletaSet(${idx},this,'unidad_peso',false)" title="Unidad del peso (kg, g, L, ml)">
-            <input type="number" step="0.01" value="${item.precio_unitario??''}" placeholder="$ Unit."
-              style="flex:1;min-width:70px;font:13px var(--mono);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-              oninput="_boletaSet(${idx},this,'precio_unitario',true)">
-            <input type="number" step="0.01" value="${item.precio_total??''}" placeholder="$ Total"
-              style="flex:1;min-width:70px;font:13px var(--mono);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-              oninput="_boletaSet(${idx},this,'precio_total',true)">
-          </div>
-          ${insumo
-            ? `<div class="item-mapeo">✓ ${insumo.nombre}</div>`
-            : `<select onchange="_boletaItems[${idx}]._insumoId=this.value"
-                style="font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);font-family:var(--font);width:100%">
-                ${selOpts.replace(`value="${curInsumoId}"`, `value="${curInsumoId}" selected`)}
-               </select>`
-          }
+  if (!_bItems.length) { wrap.innerHTML = '<div style="color:var(--ink3);font-size:13px;padding:20px 0">Sin ítems.</div>'; return; }
+  const v = x => String(x ?? '').replace(/"/g, '&quot;');
+  wrap.innerHTML = _bItems.map((item, idx) => `
+    <div class="boleta-item-row" style="grid-template-columns:1fr auto">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <input type="text" value="${v(item.nombre)}" placeholder="Nombre"
+          style="font:600 13px var(--font);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none;width:100%;box-sizing:border-box"
+          oninput="_bItems[${idx}].nombre=this.value">
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <input type="number" value="${item.cantidad??''}" placeholder="Cant."
+            style="width:65px;font:13px var(--mono);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
+            oninput="_bItems[${idx}].cantidad=parseFloat(this.value)||null">
+          <input type="text" value="${v(item.unidad)}" placeholder="Und."
+            style="width:52px;font:13px var(--mono);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
+            oninput="_bItems[${idx}].unidad=this.value">
+          <input type="number" step="0.01" value="${item.peso_por_unidad??''}" placeholder="Peso/u"
+            style="width:70px;font:13px var(--mono);padding:4px 7px;border:1.5px solid var(--info);border-radius:6px;background:#EFF6FF;outline:none"
+            oninput="_bItems[${idx}].peso_por_unidad=parseFloat(this.value)||null">
+          <input type="text" value="${v(item.unidad_peso)}" placeholder="u.peso"
+            style="width:52px;font:13px var(--mono);padding:4px 7px;border:1.5px solid var(--info);border-radius:6px;background:#EFF6FF;outline:none"
+            oninput="_bItems[${idx}].unidad_peso=this.value">
+          <input type="number" step="0.01" value="${item.precio_unitario??''}" placeholder="$ Unit."
+            style="flex:1;min-width:70px;font:13px var(--mono);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
+            oninput="_bItems[${idx}].precio_unitario=parseFloat(this.value)||null">
+          <input type="number" step="0.01" value="${item.precio_total??''}" placeholder="$ Total"
+            style="flex:1;min-width:70px;font:13px var(--mono);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
+            oninput="_bItems[${idx}].precio_total=parseFloat(this.value)||null">
         </div>
-        <button class="btn btn-ghost btn-sm" style="color:var(--danger);padding:4px 6px;align-self:start" onclick="_boletaItems.splice(${idx},1);renderBoletaItems()">✕</button>
-      </div>`;
-  }).join('');
-}
-
-function _boletaSet(idx, el, field, isNum) {
-  _boletaItems[idx][field] = isNum ? (parseFloat(el.value) || null) : el.value;
-  // Recalcular precio_total si cambia algún campo relevante
-  if (['cantidad','precio_unitario'].includes(field)) {
-    const it = _boletaItems[idx];
-    const pu = it.precio_unitario;
-    const cant = it.cantidad;
-    if (pu != null && cant != null) {
-      const total = it.peso_por_unidad ? cant * it.peso_por_unidad * pu : cant * pu;
-      it.precio_total = Math.round(total * 100) / 100;
-      // Actualizar el input de precio_total en el DOM sin re-renderizar
-      const row = document.getElementById('boletaItemsWrap').children[idx];
-      if (row) {
-        const totalInput = row.querySelector('input[placeholder="$ Total"]');
-        if (totalInput) totalInput.value = it.precio_total;
-      }
-    }
-  }
-}
-
-function resetBoleta() {
-  _boletaItems      = [];
-  _boletaImageB64   = null;
-  _boletaProvId     = null;
-  _boletaProvNombre = null;
-  document.getElementById('boletaNumero').value             = '';
-  document.getElementById('boletaHora').textContent         = '—';
-  document.getElementById('boletaImporteTotal').textContent = '—';
-  document.getElementById('boletaDetected').style.display   = 'none';
-  document.getElementById('boletaPhotoWrap').innerHTML      = '<div class="no-photo">📷<br>Subí la foto de la boleta</div>';
-  document.getElementById('boletaItemsWrap').innerHTML      = '<div style="color:var(--ink3);font-size:13px;padding:20px 0">Los ítems extraídos aparecen acá.</div>';
-  document.getElementById('btnExtraer').disabled            = true;
-  document.getElementById('btnConfirmar').style.display     = 'none';
-  if (_boletaQueueResolve) { const r = _boletaQueueResolve; _boletaQueueResolve = null; r(true); }
+      </div>
+      <button class="btn btn-ghost btn-sm" style="color:var(--danger);padding:4px 6px;align-self:start" onclick="_bItems.splice(${idx},1);_bRenderItems()">✕</button>
+    </div>`).join('');
 }
 
 function confirmarBoleta() {
-  const fecha        = document.getElementById('boletaFecha').value;
-  const nroBoleta    = document.getElementById('boletaNumero').value.trim();
-  const hora         = document.getElementById('boletaHora').textContent.replace('—','').trim() || null;
-  const importeEl    = document.getElementById('boletaImporteTotal').textContent;
+  const fecha     = document.getElementById('boletaFecha').value;
+  const nroBoleta = document.getElementById('boletaNumero').value.trim();
+  const hora      = document.getElementById('boletaHora').textContent.replace('—','').trim() || null;
+  const importeEl = document.getElementById('boletaImporteTotal').textContent;
   const importeTotal = importeEl && importeEl !== '—' ? Number(importeEl.replace(/[^0-9]/g,'')) || null : null;
 
-  if (!fecha)               { toast('Ingresá la fecha de la boleta', 'error'); return; }
-  if (!_boletaItems.length) { toast('No hay ítems para guardar', 'error'); return; }
-  if (!_boletaProvNombre) {
-    const manualWrap = document.getElementById('boletaManualProvWrap');
-    const manualInput = document.getElementById('boletaManualProv');
-    const typed = manualInput?.value.trim();
-    if (!typed) {
-      manualWrap.style.display = 'flex';
-      manualInput.focus();
-      toast('Ingresá el nombre del proveedor', 'error');
-      return;
-    }
-    _boletaProvNombre = typed;
+  if (!fecha)          { toast('Ingresá la fecha', 'error'); return; }
+  if (!_bItems.length) { toast('No hay ítems para guardar', 'error'); return; }
+  if (!_bProvName)     { toast('No se detectó el proveedor', 'error'); return; }
+
+  // Resolver o crear proveedor
+  const norm = s => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+  let prov = proveedores.find(p =>
+    norm(p.nombre).includes(norm(_bProvName)) || norm(_bProvName).includes(norm(p.nombre))
+  );
+  if (!prov) {
+    prov = { id: crypto.randomUUID(), nombre: _bProvName.toUpperCase(), telefono: '', email: '', notas: '', pago: 'transferencia', items: [] };
+    proveedores.push(prov);
+    toast(`Proveedor "${prov.nombre}" dado de alta`, 'success');
   }
+  _bProvId = prov.id;
 
-  // Auto-create provider if new
-  if (!_boletaProvId) {
-    const nuevo = { id: crypto.randomUUID(), nombre: _boletaProvNombre.toUpperCase(), telefono: '', email: '', notas: '', pago: 'transferencia', items: [] };
-    proveedores.push(nuevo);
-    _boletaProvId = nuevo.id;
-    toast(`Proveedor "${nuevo.nombre}" dado de alta`, 'success');
-  }
+  // Construir ítems de la factura
+  const itemsFactura = _bItems.map(item => {
+    // Registrar nombre en prov.items si es nuevo
+    if (item.nombre && !prov.items.some(it => it.nombreBoleta.toLowerCase() === item.nombre.toLowerCase()))
+      prov.items.push({ id: crypto.randomUUID(), nombreBoleta: item.nombre, insumoId: null, unidad: item.unidad || '' });
 
-  const prov = proveedores.find(p => p.id === _boletaProvId);
+    const mapping  = prov.items.find(it => it.nombreBoleta.toLowerCase() === (item.nombre||'').toLowerCase());
+    const insumoId = mapping?.insumoId || null;
 
-  // Construir itemsFactura primero
-  const itemsFactura = _boletaItems.map(item => {
-    const mapping  = prov?.items.find(it => it.nombreBoleta.toLowerCase() === item.nombre?.toLowerCase());
-    const insumoId = mapping?.insumoId || item._insumoId || null;
-    if (item.nombre && prov) {
-      const exists = prov.items.some(it => it.nombreBoleta.toLowerCase() === item.nombre.toLowerCase());
-      if (!exists) prov.items.push({ id: crypto.randomUUID(), nombreBoleta: item.nombre, insumoId, unidad: item.unidad || '' });
-    }
+    // Guardar precio si hay insumo mapeado
     if (insumoId && item.precio_unitario != null) {
       precios.push({
-        id: crypto.randomUUID(), insumoId, proveedorId: _boletaProvId,
+        id: crypto.randomUUID(), insumoId, proveedorId: _bProvId,
         fecha, nroBoleta: nroBoleta || null, nombreBoleta: item.nombre,
         cantidad: item.cantidad, unidad: item.unidad,
         pesoPorUnidad: item.peso_por_unidad ?? null, unidadPeso: item.unidad_peso ?? null,
@@ -3217,73 +2788,49 @@ function confirmarBoleta() {
         fuente: 'foto',
       });
     }
-    // Auto-guardar presentación del insumo si viene peso/volumen por unidad
+
+    // Propagar presentación al insumo si viene peso por unidad
     if (insumoId && item.peso_por_unidad && item.unidad_peso) {
       const ins = insumos.find(i => i.id === insumoId);
       if (ins && !ins.presUnitWeight) {
-        ins.presQty           = 1;
-        ins.presUnit          = 'u';
-        ins.presUnitWeight    = item.peso_por_unidad;
-        ins.presUnitWeightUnit = item.unidad_peso;
-        ins.unidad            = item.unidad_peso;
+        ins.presQty = 1; ins.presUnit = 'u';
+        ins.presUnitWeight = item.peso_por_unidad; ins.presUnitWeightUnit = item.unidad_peso;
+        ins.unidad = item.unidad_peso;
       }
     }
-    return { nombre: item.nombre, cantidad: item.cantidad, unidad: item.unidad,
-             peso_por_unidad: item.peso_por_unidad ?? null, unidad_peso: item.unidad_peso ?? null,
-             precio_unitario: item.precio_unitario, precio_total: item.precio_total,
-             iva: item.iva ?? null, insumoId };
+
+    return {
+      nombre: item.nombre, cantidad: item.cantidad, unidad: item.unidad,
+      peso_por_unidad: item.peso_por_unidad ?? null, unidad_peso: item.unidad_peso ?? null,
+      precio_unitario: item.precio_unitario, precio_total: item.precio_total,
+      iva: item.iva ?? null, insumoId,
+    };
   });
 
-  // Si el número ya existe, actualizar con lo que se ve en pantalla
-  if (nroBoleta) {
-    const existente = facturas.find(f => f.nroBoleta === nroBoleta && f.proveedorId === _boletaProvId);
-    if (existente) {
-      itemsFactura.forEach(i => {
-        const idx = existente.items.findIndex(e => e.nombre?.toLowerCase() === i.nombre?.toLowerCase());
-        if (idx >= 0) {
-          existente.items[idx] = { ...existente.items[idx], ...i };
-        } else {
-          existente.items.push(i);
-        }
-      });
-      if (importeTotal) existente.importeTotal = importeTotal;
-      const { creados, pendientes } = altaInsumosDesdeFacturas(_boletaProvId, true);
-      persist(); renderInsumos(); renderProveedores(); renderBoletaHistorial();
-      const msg = [
-        `Boleta actualizada — ${itemsFactura.length} ítem${itemsFactura.length !== 1 ? 's' : ''}`,
-        creados ? `${creados} insumo${creados !== 1 ? 's' : ''} dado${creados !== 1 ? 's' : ''} de alta` : '',
-        pendientes.length ? `${pendientes.length} requieren revisión` : '',
-      ].filter(Boolean).join(' · ');
-      toast(msg, pendientes.length ? 'warn' : 'success');
-      if (pendientes.length) _mostrarRevisionNombres(pendientes);
-      if (_boletaFotoNombre) _registrarArchivoSubido(_boletaFotoNombre);
-      resetBoleta();
-      return;
-    }
-  }
+  facturas.push({
+    id: crypto.randomUUID(), proveedorId: _bProvId,
+    nroBoleta: nroBoleta || null, fecha, hora, importeTotal,
+    items: itemsFactura, creadaEn: new Date().toISOString(),
+  });
 
-  // Nueva factura — warning si algún nombre ya existía en otras facturas del mismo proveedor
-  const nombresExistentes = itemsFactura
-    .filter(i => i.nombre && facturas.some(f =>
-      f.proveedorId === _boletaProvId &&
-      f.items.some(e => e.nombre?.toLowerCase() === i.nombre.toLowerCase())
-    ))
-    .map(i => i.nombre);
-  if (nombresExistentes.length) {
-    const lista = nombresExistentes.slice(0, 5).join(', ') + (nombresExistentes.length > 5 ? ` y ${nombresExistentes.length - 5} más` : '');
-    toast(`⚠ Ya existían en otras facturas: ${lista}`, 'warn', 6000);
-  }
-
-  facturas.push({ id: crypto.randomUUID(), proveedorId: _boletaProvId, nroBoleta: nroBoleta || null,
-                  fecha, hora, importeTotal, items: itemsFactura, creadaEn: new Date().toISOString() });
-
-  if (_boletaFotoNombre) _registrarArchivoSubido(_boletaFotoNombre);
-
-  const { creados, pendientes } = altaInsumosDesdeFacturas(_boletaProvId, true);
-  persist(); renderInsumos(); renderProveedores(); renderBoletaHistorial();
-  toast(`Factura guardada — ${itemsFactura.length} ítems${creados ? ` · ${creados} insumos de alta` : ''}${pendientes.length ? ` · ${pendientes.length} requieren revisión` : ''}`, pendientes.length ? 'warn' : 'success');
+  const { creados, pendientes } = altaInsumosDesdeFacturas(_bProvId, true);
+  persist(); renderInsumos(); renderProveedores();
+  toast(`Factura guardada — ${itemsFactura.length} ítems${creados ? ` · ${creados} insumos de alta` : ''}`, 'success');
   if (pendientes.length) _mostrarRevisionNombres(pendientes);
   resetBoleta();
+}
+
+function resetBoleta() {
+  _bImg64 = null; _bImgMime = null; _bFile = null;
+  _bItems = []; _bProvId = null; _bProvName = null;
+  document.getElementById('boletaNumero').value             = '';
+  document.getElementById('boletaHora').textContent         = '—';
+  document.getElementById('boletaImporteTotal').textContent = '—';
+  document.getElementById('boletaDetected').style.display   = 'none';
+  document.getElementById('boletaPhotoWrap').innerHTML      = '<div class="no-photo">📷<br>Subí la foto de la boleta</div>';
+  document.getElementById('boletaItemsWrap').innerHTML      = '<div style="color:var(--ink3);font-size:13px;padding:20px 0">Los ítems extraídos aparecen acá.</div>';
+  document.getElementById('btnExtraer').disabled            = true;
+  document.getElementById('btnConfirmar').style.display     = 'none';
 }
 
 function eliminarFactura(facturaId, provId) {
@@ -5386,7 +4933,7 @@ async function _fbLoad() {
     // Actualizar boletas si está visible
     const bannerApikey = document.getElementById('apikeyBanner');
     if (bannerApikey && getApiKey()) bannerApikey.style.display = 'none';
-    if (_boletaItems.length) renderBoletaItems();
+    if (_bItems.length) _bRenderItems();
     _syncChip('ok');
   } catch(e) {
     console.warn('Firebase load error:', e);

@@ -2341,7 +2341,7 @@ function altaInsumosDesdeFacturas(provId, silent = false) {
     const unidadPeso   = ult?.unidad_peso ?? null;
 
     const presFields = pesoPorU && unidadPeso
-      ? { presQty: 1, presUnit: 'u', presUnitWeight: pesoPorU, presUnitWeightUnit: unidadPeso, unidad: unidadPeso }
+      ? { presQty: 1, presUnit: unidad || 'u', presUnitWeight: pesoPorU, presUnitWeightUnit: unidadPeso, unidad: unidadPeso }
       : {};
 
     const exacto = insumos.find(i => norm(i.nombre) === norm(nombre));
@@ -2578,7 +2578,7 @@ function saveEditFactura() {
     if (!insumoId) return;
     const ins = insumos.find(i => i.id === insumoId);
     if (ins && !ins.presUnitWeight) {
-      ins.presQty = 1; ins.presUnit = 'u';
+      ins.presQty = 1; ins.presUnit = item.unidad || 'u';
       ins.presUnitWeight = item.peso_por_unidad; ins.presUnitWeightUnit = item.unidad_peso;
       ins.unidad = item.unidad_peso;
     }
@@ -2894,7 +2894,7 @@ function confirmarBoleta() {
     if (item.peso_por_unidad && item.unidad_peso) {
       const ins = insumos.find(i => i.id === insumoId);
       if (ins && !ins.presUnitWeight) {
-        ins.presQty = 1; ins.presUnit = 'u';
+        ins.presQty = 1; ins.presUnit = item.unidad || 'u';
         ins.presUnitWeight = item.peso_por_unidad; ins.presUnitWeightUnit = item.unidad_peso;
         ins.unidad = item.unidad_peso;
       }
@@ -3534,7 +3534,7 @@ function _fmtPres(ins) {
   else if (ins.presUnit === 'g')  { costo = (precio / ins.presQty) * 1000; label = '/kg'; }
   else if (ins.presUnit === 'L')  { costo = precio / ins.presQty;          label = '/L';  }
   else if (ins.presUnit === 'ml') { costo = (precio / ins.presQty) * 1000; label = '/L';  }
-  else if (ins.presUnit === 'u' && ins.presUnitWeight && ins.presUnitWeightUnit) {
+  else if (_typeOf(ins.presUnit) === 'u' && ins.presUnitWeight && ins.presUnitWeightUnit) {
     const _N = { kg:1, g:0.001, L:1, ml:0.001 };
     const totalNorm = ins.presQty * ins.presUnitWeight * (_N[ins.presUnitWeightUnit] || 1);
     const isVol = ['L','ml'].includes(ins.presUnitWeightUnit);
@@ -3564,7 +3564,7 @@ function calcCostoIng(ins, cantidad, unidad) {
   }
 
   // Cross-type: presentación en unidades con peso/volumen conocido por unidad
-  if (presUnit === 'u' && ins.presUnitWeight && ins.presUnitWeightUnit) {
+  if (_typeOf(presUnit) === 'u' && ins.presUnitWeight && ins.presUnitWeightUnit) {
     if (_typeOf(ins.presUnitWeightUnit) === _typeOf(unidad)) {
       const totalBase = presQty * ins.presUnitWeight * (_UNIDAD_BASE[ins.presUnitWeightUnit] || 1);
       const cantEnBase = cantidad * (_UNIDAD_BASE[unidad] || 1);
@@ -4674,8 +4674,8 @@ function verReceta(recetaId) {
                    : subR ? (() => { const c = _calcCostoRecetaUnd(ing.recetaId, new Set()); const q = Math.max(0, parseFloat(ing.cantidad)||0); return (!isNaN(c) && q>0) ? c*q : null; })()
                    : null;
         const info  = ins?.presQty
-                    ? (ins.presUnit === 'u' && ins.presUnitWeight && ins.presUnitWeightUnit
-                        ? `${ins.presQty}u=${ins.presUnitWeight}${ins.presUnitWeightUnit}`
+                    ? (_typeOf(ins.presUnit) === 'u' && ins.presUnitWeight && ins.presUnitWeightUnit
+                        ? `${ins.presQty}${ins.presUnit}=${ins.presUnitWeight}${ins.presUnitWeightUnit}`
                         : `${ins.presQty}${ins.presUnit}`)
                     : ins ? '<span style="color:var(--warn);font-size:11px">sin pres.</span>'
                     : subR ? `<span style="font-size:11px;color:var(--ink3)">rinde ${subR.rinde||1}</span>`

@@ -1789,9 +1789,12 @@ function _parseNum(raw) {
   if (raw == null) return null;
   let s = String(raw).trim();
   if (!s) return null;
-  // Si tiene coma y punto, asumimos punto = miles, coma = decimal
+  // Coma y punto presentes → punto=miles, coma=decimal (notación AR)
   if (s.includes(',') && s.includes('.')) s = s.replace(/\./g, '').replace(',', '.');
+  // Solo coma → es el separador decimal
   else if (s.includes(',')) s = s.replace(',', '.');
+  // Múltiples puntos sin coma → todos son separadores de miles
+  else if ((s.match(/\./g) || []).length > 1) s = s.replace(/\./g, '');
   const n = parseFloat(s);
   return isNaN(n) ? null : n;
 }
@@ -2846,11 +2849,16 @@ Respondé ÚNICAMENTE con JSON válido, sin texto adicional ni markdown, con est
   ]
 }
 
-IMPORTANTE — NOTACIÓN ARGENTINA DE NÚMEROS:
-- En Argentina el punto (.) separa MILES y la coma (,) separa DECIMALES.
-- Ejemplos: "1.029" = 1029 (mil veintinueve, NO uno coma veintinueve); "12.345,67" = 12345.67; "1.234.567" = 1234567.
-- Convertí TODOS los números a JSON estándar (punto como decimal, sin separador de miles): "1.029" → 1029; "12.345,67" → 12345.67.
-- NUNCA devuelvas un número con punto si en la boleta el punto era de miles.
+IMPORTANTE — NOTACIÓN ARGENTINA DE NÚMEROS (aplica SOLO a PRECIOS, no a cantidades):
+- En PRECIOS argentinos, el punto (.) separa MILES y la coma (,) separa DECIMALES.
+- Ejemplos de PRECIOS: "$1.029" → 1029; "$12.345,67" → 12345.67; "$1.234.567,89" → 1234567.89.
+- Convertí precios a JSON estándar: sin separador de miles, punto como decimal.
+
+CANTIDADES (campo "cantidad" y "peso_por_unidad"):
+- Casi siempre son números chicos: 1, 2, 3, 10, 25, 50.
+- Si la boleta dice "1,00" o "1.00" o "1" en cantidad → es 1 (uno).
+- Si la boleta dice "25" o "25,00" en cantidad o peso → es 25.
+- NO interpretes una cantidad chica como miles. "1" siempre es 1, no 1000.
 
 Si no podés leer algún campo con certeza, ponés null.`;
 

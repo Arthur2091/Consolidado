@@ -3261,8 +3261,7 @@ function confirmarBoleta() {
       const { creados, pendientes } = altaInsumosDesdeFacturas(_boletaProvId, true);
       persist(); renderInsumos(); renderProveedores(); renderBoletaHistorial();
       const msg = [
-        itemsNuevos.length ? `${itemsNuevos.length} ítem${itemsNuevos.length !== 1 ? 's' : ''} agregado${itemsNuevos.length !== 1 ? 's' : ''}` : '',
-        itemsActualizados.length ? `${itemsActualizados.length} precio${itemsActualizados.length !== 1 ? 's' : ''} actualizado${itemsActualizados.length !== 1 ? 's' : ''}` : '',
+        `Boleta actualizada — ${itemsFactura.length} ítem${itemsFactura.length !== 1 ? 's' : ''}`,
         creados ? `${creados} insumo${creados !== 1 ? 's' : ''} dado${creados !== 1 ? 's' : ''} de alta` : '',
         pendientes.length ? `${pendientes.length} requieren revisión` : '',
       ].filter(Boolean).join(' · ');

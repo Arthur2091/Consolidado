@@ -2610,7 +2610,27 @@ function onBoletaFoto(e) {
   const files = Array.from(e.target.files);
   e.target.value = '';
   if (!files.length) return;
+  const ya = JSON.parse(localStorage.getItem('boletaArchivos') || '[]');
+  const dup = files.filter(f => ya.includes(f.name));
+  if (dup.length) {
+    const nombres = dup.map(f => `"${f.name}"`).join(', ');
+    document.getElementById('boletaDupText').textContent =
+      `${nombres} ya ${dup.length === 1 ? 'fue subido' : 'fueron subidos'} antes.`;
+    document.getElementById('boletaDupBanner').style.display = 'flex';
+    window._bPending = files[0];
+    return;
+  }
   _bCargar(files[0]);
+}
+
+function _confirmarDuplicado() {
+  document.getElementById('boletaDupBanner').style.display = 'none';
+  if (window._bPending) { _bCargar(window._bPending); window._bPending = null; }
+}
+
+function _cancelarDuplicado() {
+  document.getElementById('boletaDupBanner').style.display = 'none';
+  window._bPending = null;
 }
 
 function _bCargar(file) {
@@ -2817,6 +2837,10 @@ function confirmarBoleta() {
   persist(); renderInsumos(); renderProveedores();
   toast(`Factura guardada — ${itemsFactura.length} ítems${creados ? ` · ${creados} insumos de alta` : ''}`, 'success');
   if (pendientes.length) _mostrarRevisionNombres(pendientes);
+  if (_bFile) {
+    const arr = JSON.parse(localStorage.getItem('boletaArchivos') || '[]');
+    if (!arr.includes(_bFile)) { arr.push(_bFile); localStorage.setItem('boletaArchivos', JSON.stringify(arr)); }
+  }
   resetBoleta();
 }
 

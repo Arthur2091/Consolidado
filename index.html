@@ -2877,17 +2877,34 @@ function confirmarBoleta() {
     insumoId: prov.items.find(it => it.nombreBoleta.toLowerCase() === (item.nombre||'').toLowerCase())?.insumoId || null,
   }));
 
-  facturas.push({
-    id: crypto.randomUUID(), proveedorId: _bProvId,
-    nroBoleta: nroBoleta || null, fecha, hora, importeTotal,
-    items: itemsFactura, creadaEn: new Date().toISOString(),
-  });
+  // Detectar si ya existe una factura con el mismo nro de boleta y proveedor (hoja 2+ del mismo comprobante)
+  const facturaExistente = nroBoleta
+    ? facturas.find(f => f.proveedorId === _bProvId && (f.nroBoleta||'').trim() === nroBoleta)
+    : null;
+
+  let facturaMergeada = false;
+  if (facturaExistente) {
+    const nombresExistentes = new Set(facturaExistente.items.map(it => (it.nombre||'').toLowerCase()));
+    const nuevos = itemsFactura.filter(it => !nombresExistentes.has((it.nombre||'').toLowerCase()));
+    facturaExistente.items.push(...nuevos);
+    if (importeTotal && (!facturaExistente.importeTotal || importeTotal > facturaExistente.importeTotal))
+      facturaExistente.importeTotal = importeTotal;
+    if (!facturaExistente.hora && hora) facturaExistente.hora = hora;
+    facturaMergeada = true;
+    toast(`Hoja agregada a boleta ${nroBoleta} (${nuevos.length} ítems nuevos)`, 'success');
+  } else {
+    facturas.push({
+      id: crypto.randomUUID(), proveedorId: _bProvId,
+      nroBoleta: nroBoleta || null, fecha, hora, importeTotal,
+      items: itemsFactura, creadaEn: new Date().toISOString(),
+    });
+  }
 
   // Crear insumos nuevos primero — después de esto prov.items tiene los insumoId actualizados
   const { creados, pendientes } = altaInsumosDesdeFacturas(_bProvId, true);
 
   // Propagar peso y precio a los insumos (ahora sí existen)
-  const facturaGuardada = facturas[facturas.length - 1];
+  const facturaGuardada = facturaMergeada ? facturaExistente : facturas[facturas.length - 1];
   facturaGuardada.items.forEach(item => {
     const mapping  = prov.items.find(it => it.nombreBoleta.toLowerCase() === (item.nombre||'').toLowerCase());
     const insumoId = mapping?.insumoId || null;
@@ -2922,7 +2939,10 @@ function confirmarBoleta() {
 
   console.log('[boleta] items guardados:', JSON.stringify(facturas[facturas.length-1].items.map(x => ({n:x.nombre,peso:x.peso_por_unidad,upeso:x.unidad_peso}))));
   persist(); renderInsumos(); renderProveedores();
-  toast(`Factura guardada — ${itemsFactura.length} ítems${creados ? ` · ${creados} insumos de alta` : ''}`, 'success');
+  if (!facturaMergeada)
+    toast(`Factura guardada — ${itemsFactura.length} ítems${creados ? ` · ${creados} insumos de alta` : ''}`, 'success');
+  else if (creados)
+    toast(`${creados} insumos dados de alta`, 'success');
   if (pendientes.length) _mostrarRevisionNombres(pendientes);
   if (_bFile) {
     const arr = JSON.parse(localStorage.getItem('boletaArchivos') || '[]');

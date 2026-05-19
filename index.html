@@ -2624,7 +2624,7 @@ function getApiKey() { return localStorage.getItem('cons_apikey') || ''; }
 
 function initBoletasView() {
   document.getElementById('apikeyBanner').style.display = getApiKey() ? 'none' : 'flex';
-  document.getElementById('boletaFecha').value = new Date().toISOString().slice(0,10);
+  document.getElementById('boletaFecha').value = '';
 }
 
 function onBoletaFoto(e) {
@@ -2783,7 +2783,7 @@ async function extraerBoleta() {
     _bItems    = parsed.items || [];
     _bProvName = parsed.proveedor || null;
 
-    if (parsed.fecha)         { const el = document.getElementById('boletaFecha');     if (!el.value) el.value = parsed.fecha; }
+    if (parsed.fecha)         document.getElementById('boletaFecha').value = parsed.fecha;
     if (parsed.nro_boleta)    { const el = document.getElementById('boletaNumero');    if (!el.value) el.value = parsed.nro_boleta; }
     if (parsed.hora)          document.getElementById('boletaHora').textContent         = parsed.hora;
     if (parsed.importe_total) document.getElementById('boletaImporteTotal').textContent = `Total: ${pesos(parsed.importe_total)}`;

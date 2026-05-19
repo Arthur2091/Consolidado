@@ -4673,7 +4673,6 @@ function verReceta(recetaId) {
         <th style="text-align:right">Cant.</th>
         <th>Und.</th>
         <th>Vinculado</th>
-        <th>Info</th>
         <th style="text-align:right">Subtotal</th>
       </tr></thead>
       <tbody>${ings.map((ing, ii) => {
@@ -4720,7 +4719,6 @@ function verReceta(recetaId) {
           <td style="text-align:right;font-family:'DM Mono',monospace">${ing.cantidad}</td>
           <td style="color:var(--ink2)">${ing.unidad}</td>
           <td style="min-width:220px">${vinculado}</td>
-          <td style="font-size:12px;font-family:'DM Mono',monospace;color:var(--ink2)">${info}</td>
           <td style="text-align:right;font-weight:600">${st!=null ? '$'+st.toFixed(2) : '—'}</td>
         </tr>`;
       }).join('')}</tbody>

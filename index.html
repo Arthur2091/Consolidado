@@ -2800,6 +2800,12 @@ Respondé ÚNICAMENTE con JSON válido, sin texto adicional ni markdown, con est
   ]
 }
 
+IMPORTANTE — NOTACIÓN ARGENTINA DE NÚMEROS:
+- En Argentina el punto (.) separa MILES y la coma (,) separa DECIMALES.
+- Ejemplos: "1.029" = 1029 (mil veintinueve, NO uno coma veintinueve); "12.345,67" = 12345.67; "1.234.567" = 1234567.
+- Convertí TODOS los números a JSON estándar (punto como decimal, sin separador de miles): "1.029" → 1029; "12.345,67" → 12345.67.
+- NUNCA devuelvas un número con punto si en la boleta el punto era de miles.
+
 Si no podés leer algún campo con certeza, ponés null.`;
 
 async function _bCallIA(b64, mime) {
@@ -2833,6 +2839,14 @@ async function extraerBoleta() {
     const parsed = await _bCallIA(_bImg64, _bImgMime);
     _bItems    = parsed.items || [];
     _bProvName = parsed.proveedor || null;
+
+    // Normalizar numéricos defensivamente (por si la IA devuelve strings con notación argentina)
+    _bItems.forEach(item => {
+      ['cantidad','peso_por_unidad','precio_unitario','precio_total','iva'].forEach(k => {
+        if (item[k] != null && typeof item[k] === 'string') item[k] = _parseNum(item[k]);
+      });
+    });
+    if (typeof parsed.importe_total === 'string') parsed.importe_total = _parseNum(parsed.importe_total);
 
     // Preservar el nombre crudo de la IA para poder reconocer renombres futuros
     _bItems.forEach(item => { item.nombreIA = item.nombre || ''; });

@@ -2783,7 +2783,10 @@ async function extraerBoleta() {
     _bItems    = parsed.items || [];
     _bProvName = parsed.proveedor || null;
 
-    // Autocompletar peso/unidad desde insumos previamente cargados de este proveedor
+    // Preservar el nombre crudo de la IA para poder reconocer renombres futuros
+    _bItems.forEach(item => { item.nombreIA = item.nombre || ''; });
+
+    // Autocompletar nombre editado, peso/unidad desde el historial del proveedor
     if (_bProvName) {
       const norm = s => (s||'').toLowerCase().replace(/[^a-z0-9]/g, '');
       const prov = proveedores.find(p =>
@@ -2791,8 +2794,19 @@ async function extraerBoleta() {
       );
       if (prov) {
         _bItems.forEach(item => {
-          const mapping = (prov.items || []).find(it => norm(it.nombreBoleta) === norm(item.nombre));
-          const ins = mapping?.insumoId ? insumos.find(i => i.id === mapping.insumoId) : null;
+          // 1) Buscar mapping por nombreOriginal (lo que extrajo la IA) o por nombreBoleta
+          const mapping = (prov.items || []).find(it =>
+            (it.nombreOriginal && norm(it.nombreOriginal) === norm(item.nombreIA)) ||
+            norm(it.nombreBoleta) === norm(item.nombreIA)
+          );
+          if (!mapping) return;
+
+          // 2) Si el usuario renombró antes, aplicar el nombre editado
+          if (mapping.nombreBoleta && norm(mapping.nombreBoleta) !== norm(item.nombre))
+            item.nombre = mapping.nombreBoleta;
+
+          // 3) Autocompletar peso/unidad desde el insumo vinculado
+          const ins = mapping.insumoId ? insumos.find(i => i.id === mapping.insumoId) : null;
           if (!ins) return;
           if ((item.peso_por_unidad == null || item.unidad_peso == null) && ins.presUnitWeight && ins.presUnitWeightUnit) {
             item.peso_por_unidad = ins.presUnitWeight;
@@ -2882,10 +2896,24 @@ function confirmarBoleta() {
   }
   _bProvId = prov.id;
 
-  // Registrar nombres nuevos en prov.items
+  // Registrar nombres en prov.items — preservar nombreOriginal (lo que extrajo la IA) para reconocer renombres futuros
   _bItems.forEach(item => {
-    if (item.nombre && !prov.items.some(it => it.nombreBoleta.toLowerCase() === item.nombre.toLowerCase()))
-      prov.items.push({ id: crypto.randomUUID(), nombreBoleta: item.nombre, insumoId: null, unidad: item.unidad || '' });
+    if (!item.nombre) return;
+    const nlc  = item.nombre.toLowerCase();
+    const olc  = (item.nombreIA || '').toLowerCase();
+    const existing = prov.items.find(it =>
+      it.nombreBoleta.toLowerCase() === nlc ||
+      (it.nombreOriginal && olc && it.nombreOriginal.toLowerCase() === olc)
+    );
+    if (!existing) {
+      prov.items.push({
+        id: crypto.randomUUID(), nombreBoleta: item.nombre,
+        nombreOriginal: item.nombreIA || item.nombre,
+        insumoId: null, unidad: item.unidad || ''
+      });
+    } else if (!existing.nombreOriginal && item.nombreIA) {
+      existing.nombreOriginal = item.nombreIA;
+    }
   });
 
   // Construir ítems de la factura

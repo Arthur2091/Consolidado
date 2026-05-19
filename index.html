@@ -2519,28 +2519,53 @@ function openEditFactura(facturaId, provId) {
 }
 
 function _efRefreshItems() {
+  const lbl = t => `<div style="font-size:.65rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">${t}</div>`;
   document.getElementById('efItemsList').innerHTML = _efItems.map((it, i) => `
-    <div style="display:flex;flex-direction:column;gap:4px;background:var(--bg);border-radius:8px;padding:6px 8px">
-      <div style="display:flex;gap:6px;align-items:center">
-        <input style="flex:2;font:13px var(--font);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-          placeholder="Nombre" value="${_efEsc(it.nombre||'')}" oninput="_efSet(${i},'nombre',this.value)">
-        <input style="width:60px;font:13px var(--mono);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-          type="number" step="any" placeholder="Cant." value="${it.cantidad??''}" oninput="_efSet(${i},'cantidad',parseFloat(this.value)||null)">
-        <input style="width:48px;font:13px var(--mono);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-          placeholder="Ud." value="${_efEsc(it.unidad||'')}" oninput="_efSet(${i},'unidad',this.value)">
-        <input style="width:88px;font:13px var(--mono);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-          type="number" step="0.01" placeholder="$ Total" value="${it.precio_total??''}" oninput="_efSet(${i},'precio_total',parseFloat(this.value)||null)">
-        <button style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:16px;padding:2px 4px;line-height:1;flex-shrink:0" onclick="_efRemove(${i})">✕</button>
+    <div style="background:var(--bg);border-radius:8px;padding:8px 10px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;gap:6px;align-items:flex-end">
+        <div style="flex:2">
+          ${lbl('Nombre')}
+          <input style="width:100%;font:13px var(--font);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none;box-sizing:border-box"
+            placeholder="Nombre" value="${_efEsc(it.nombre||'')}" oninput="_efSet(${i},'nombre',this.value)">
+        </div>
+        <button style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:0 2px;line-height:1;flex-shrink:0;margin-bottom:2px" onclick="_efRemove(${i})">✕</button>
       </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <span style="font-size:11px;color:var(--ink3);white-space:nowrap">Peso/vol por unidad:</span>
-        <input style="width:80px;font:13px var(--mono);padding:4px 8px;border:1.5px solid var(--info);border-radius:6px;background:#EFF6FF;outline:none"
-          type="number" step="any" placeholder="Ej: 25" value="${it.peso_por_unidad??''}" oninput="_efSet(${i},'peso_por_unidad',parseFloat(this.value)||null)"
-          title="Peso o volumen real de cada unidad (ej: 25 para manteca 25kg)">
-        <input style="width:56px;font:13px var(--mono);padding:4px 8px;border:1.5px solid var(--info);border-radius:6px;background:#EFF6FF;outline:none"
-          placeholder="kg/L/g" value="${_efEsc(it.unidad_peso||'')}" oninput="_efSet(${i},'unidad_peso',this.value)"
-          title="Unidad del peso (kg, g, L, ml)">
-        <span style="font-size:11px;color:var(--ink3)">→ precio unitario real por ${it.peso_por_unidad && it.unidad_peso ? it.peso_por_unidad + ' ' + it.unidad_peso : '—'}</span>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <div>
+          ${lbl('Cant.')}
+          <input style="width:60px;font:13px var(--mono);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
+            type="number" step="any" value="${it.cantidad??''}" oninput="_efSet(${i},'cantidad',parseFloat(this.value)||null)">
+        </div>
+        <div>
+          ${lbl('Unidad')}
+          <input style="width:52px;font:13px var(--mono);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
+            value="${_efEsc(it.unidad||'')}" oninput="_efSet(${i},'unidad',this.value)">
+        </div>
+        <div>
+          ${lbl('Peso/u')}
+          <input style="width:70px;font:13px var(--mono);padding:4px 8px;border:1.5px solid var(--info);border-radius:6px;background:#EFF6FF;outline:none"
+            type="number" step="any" placeholder="ej: 25" value="${it.peso_por_unidad??''}" oninput="_efSet(${i},'peso_por_unidad',parseFloat(this.value)||null)">
+        </div>
+        <div>
+          ${lbl('U. peso')}
+          <input style="width:56px;font:13px var(--mono);padding:4px 8px;border:1.5px solid var(--info);border-radius:6px;background:#EFF6FF;outline:none"
+            placeholder="kg/g/L" value="${_efEsc(it.unidad_peso||'')}" oninput="_efSet(${i},'unidad_peso',this.value)">
+        </div>
+        <div>
+          ${lbl('IVA %')}
+          <input style="width:56px;font:13px var(--mono);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
+            type="number" step="any" placeholder="21" value="${it.iva??''}" oninput="_efSet(${i},'iva',parseFloat(this.value)||null)">
+        </div>
+        <div>
+          ${lbl('$ Unit.')}
+          <input style="width:88px;font:13px var(--mono);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
+            type="number" step="0.01" placeholder="0.00" value="${it.precio_unitario??''}" oninput="_efSet(${i},'precio_unitario',parseFloat(this.value)||null)">
+        </div>
+        <div>
+          ${lbl('$ Total')}
+          <input style="width:88px;font:13px var(--mono);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
+            type="number" step="0.01" placeholder="0.00" value="${it.precio_total??''}" oninput="_efSet(${i},'precio_total',parseFloat(this.value)||null)">
+        </div>
       </div>
     </div>`).join('');
 }

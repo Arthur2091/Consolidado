@@ -2457,32 +2457,31 @@ function renderFacturaDetalle(facturaId, provId) {
     </div>
       <button onclick="eliminarFactura('${f.id}','${provId}')" style="background:none;border:1px solid var(--danger);color:var(--danger);border-radius:var(--radius);padding:.5rem .9rem;cursor:pointer;font-size:.85rem;white-space:nowrap">Eliminar</button>
     </div>
-    <div style="display:flex;flex-direction:column;gap:.4rem">
+    <div style="display:flex;flex-direction:column;gap:.5rem">
       ${f.items.map(item => {
-        const pu = item.precio_unitario != null ? item.precio_unitario
-                 : (item.precio_total != null && item.cantidad) ? item.precio_total / item.cantidad
-                 : null;
-        const ud = item.unidad || 'u';
-        const cantLine = item.cantidad != null ? `${item.cantidad} ${ud}` : '';
-        const pesoLine = item.peso_por_unidad != null && item.unidad_peso
-          ? `<span style="background:#EFF6FF;color:var(--info);border-radius:4px;padding:1px 6px;font-size:.72rem;font-weight:600;margin-left:6px">${item.peso_por_unidad} ${item.unidad_peso}/u</span>`
-          : '';
-        const ivaLine = item.iva != null ? `<span style="color:var(--ink3);font-size:.72rem;margin-left:6px">IVA ${item.iva}%</span>` : '';
-        const puLabel = pu != null ? `${pesos(pu)}/${ud}` : '';
+        const nd  = v => v != null && v !== '' ? v : '—';
+        const fld = (label, val, highlight) => `
+          <div style="display:flex;flex-direction:column;gap:1px">
+            <div style="font-size:.65rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.04em">${label}</div>
+            <div style="font-size:.82rem;font-weight:600;color:${highlight ? 'var(--info)' : val != null && val !== '' ? 'var(--ink)' : 'var(--ink3)'}">${nd(val)}</div>
+          </div>`;
         return `
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center;gap:8px">
-          <div style="flex:1">
-            <div style="font-weight:600;font-size:.9rem">${item.nombre}</div>
-            <div style="font-size:.78rem;color:var(--ink2);margin-top:2px;display:flex;align-items:center;flex-wrap:wrap;gap:2px">
-              ${cantLine}${pesoLine}${ivaLine}
-            </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem 1rem">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:.6rem">
+            <div style="font-weight:700;font-size:.95rem">${item.nombre}</div>
+            <button onclick="openEditFactura('${facturaId}','${provId}')" style="font-size:11px;padding:2px 10px;background:none;border:1px solid var(--border);border-radius:6px;color:var(--ink3);cursor:pointer;white-space:nowrap;flex-shrink:0">Editar</button>
           </div>
-          <div style="text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-            <div style="font-weight:700;font-size:.95rem">${item.precio_total != null ? pesos(item.precio_total) : '—'}</div>
-            ${puLabel ? `<div style="font-size:.72rem;color:var(--ink3)">${puLabel}</div>` : ''}
-            <button onclick="openEditFactura('${facturaId}','${provId}')" style="font-size:11px;padding:2px 8px;background:none;border:1px solid var(--border);border-radius:6px;color:var(--ink3);cursor:pointer;white-space:nowrap">Editar</button>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap">
+            ${fld('Cantidad',      item.cantidad)}
+            ${fld('Unidad',        item.unidad)}
+            ${fld('Peso/u',        item.peso_por_unidad, true)}
+            ${fld('U. peso',       item.unidad_peso, true)}
+            ${fld('IVA',           item.iva != null ? item.iva + '%' : null)}
+            ${fld('$ Unitario',    item.precio_unitario != null ? pesos(item.precio_unitario) : null)}
+            ${fld('$ Total',       item.precio_total    != null ? pesos(item.precio_total)    : null)}
           </div>
-        </div>`;}).join('')}
+        </div>`;
+      }).join('')}
     </div>`;
 }
 

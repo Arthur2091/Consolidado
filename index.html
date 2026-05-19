@@ -2685,11 +2685,28 @@ function _bCargar(file) {
   reader.readAsDataURL(file);
 }
 
-function _confirmarDuplicado() {}
-function _cancelarDuplicado() {}
-function _onProvSelectChange() {}
-function _confirmarNuevoProv() {}
-function _saltearBoleta() {}
+function _onProvSelectChange() {
+  const sel = document.getElementById('boletaProvSelect');
+  document.getElementById('boletaNewProvInput').style.display = sel.value ? 'none' : 'block';
+}
+
+function _confirmarNuevoProv() {
+  const sel   = document.getElementById('boletaProvSelect');
+  const input = document.getElementById('boletaNewProvInput');
+  const nombre = sel.value
+    ? proveedores.find(p => p.id === sel.value)?.nombre || ''
+    : input.value.trim();
+  if (!nombre) { toast('Ingresá o seleccioná un proveedor', 'error'); return; }
+  _bProvName = nombre;
+  document.getElementById('boletaNewProvBanner').style.display = 'none';
+  document.getElementById('boletaDetectedProv').textContent = _bProvName;
+  document.getElementById('boletaDetected').style.display = 'flex';
+}
+
+function _saltearBoleta() {
+  document.getElementById('boletaNewProvBanner').style.display = 'none';
+  resetBoleta();
+}
 
 const _BPROMPT = `Analizá esta boleta/factura de proveedor y extraé la siguiente información.
 

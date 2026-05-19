@@ -2783,6 +2783,26 @@ async function extraerBoleta() {
     _bItems    = parsed.items || [];
     _bProvName = parsed.proveedor || null;
 
+    // Autocompletar peso/unidad desde insumos previamente cargados de este proveedor
+    if (_bProvName) {
+      const norm = s => (s||'').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const prov = proveedores.find(p =>
+        norm(p.nombre).includes(norm(_bProvName)) || norm(_bProvName).includes(norm(p.nombre))
+      );
+      if (prov) {
+        _bItems.forEach(item => {
+          const mapping = (prov.items || []).find(it => norm(it.nombreBoleta) === norm(item.nombre));
+          const ins = mapping?.insumoId ? insumos.find(i => i.id === mapping.insumoId) : null;
+          if (!ins) return;
+          if ((item.peso_por_unidad == null || item.unidad_peso == null) && ins.presUnitWeight && ins.presUnitWeightUnit) {
+            item.peso_por_unidad = ins.presUnitWeight;
+            item.unidad_peso     = ins.presUnitWeightUnit;
+          }
+          if (!item.unidad && ins.presUnit) item.unidad = ins.presUnit;
+        });
+      }
+    }
+
     if (parsed.fecha)         document.getElementById('boletaFecha').value = parsed.fecha;
     if (parsed.nro_boleta)    { const el = document.getElementById('boletaNumero');    if (!el.value) el.value = parsed.nro_boleta; }
     if (parsed.hora)          document.getElementById('boletaHora').textContent         = parsed.hora;

@@ -1782,7 +1782,7 @@ function clearAll() {
 /* ── RENDER INSUMOS ─────────────────────────────────────────────── */
 function fmt(n) {
   if (n === null || n === undefined) return '—';
-  return '$' + n.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  return '$' + Math.ceil(n).toLocaleString('es-AR');
 }
 
 function _parseNum(raw) {
@@ -3209,7 +3209,7 @@ function toggleSection(id) {
 
 function pesos(n) {
   if (!n && n !== 0) return '—';
-  return '$' + Math.round(n).toLocaleString('es-AR');
+  return '$' + Math.ceil(n).toLocaleString('es-AR');
 }
 
 /* PRODUCTOS */

@@ -5386,6 +5386,18 @@ async function _fbLoad() {
   }
 }
 
+async function _borrarTodo() {
+  if (!confirm('¿Borrar TODO? Esto elimina insumos, proveedores, precios, boletas, recetas y contable de Firebase. No se puede deshacer.')) return;
+  const docs = ['insumos','proveedores','precios','facturas','recetas','contable'];
+  await Promise.all(docs.map(id => _db.collection('data').doc(id).delete()));
+  insumos = []; proveedores = []; precios = []; facturas = []; recetas = [];
+  ventas = []; sueldos = []; otrosEgresos = [];
+  localStorage.removeItem('boletaArchivos');
+  renderInsumos(); renderProveedores(); renderRecetas(); initContableView();
+  toast('Todo borrado. Base limpia.', 'success');
+  console.log('✓ Firebase data cleared');
+}
+
 /* ── BACKUP ─────────────────────────────────────────────────────── */
 function exportarDatos() {
   const data = {

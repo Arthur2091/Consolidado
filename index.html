@@ -2575,6 +2575,7 @@ let _boletaProvId     = null;
 let _boletaProvNombre = null;
 let _boletaQueue        = [];
 let _boletaQueueRunning = false;
+let _boletaQueueResolve = null;
 let _boletaProvResolve  = null;
 let _boletaProvReject   = null;
 
@@ -2655,7 +2656,6 @@ function _iniciarColaBoletas(files) {
   _boletaQueue = files;
   _boletaQueueRunning = true;
   document.getElementById('btnExtraer').disabled = true;
-  document.getElementById('btnConfirmar').style.display = 'none';
   document.getElementById('boletaQueueBar').style.display = 'flex';
   _procesarColaBoletas(0, 0, []);
 }
@@ -2705,6 +2705,7 @@ async function _extraerYGuardar(file) {
   const apiKey = getApiKey();
   if (!apiKey) return false;
 
+  _boletaFotoNombre = file.name;
   const dataUrl = await _loadFileB64(file);
   const b64  = dataUrl.split(',')[1];
   const mime = file.type;
@@ -2828,33 +2829,11 @@ Si no podés leer algún campo con certeza, ponés null.`;
   });
   renderBoletaItems();
 
-  // Merge if nro_boleta exists
-  if (parsed.nro_boleta) {
-    const existente = facturas.find(f => f.nroBoleta === parsed.nro_boleta && f.proveedorId === prov.id);
-    if (existente) {
-      itemsFactura.forEach(i => {
-        const existeItem = existente.items.find(e => e.nombre?.toLowerCase() === i.nombre?.toLowerCase());
-        if (!existeItem) {
-          existente.items.push(i);
-        } else {
-          if (i.peso_por_unidad != null && existeItem.peso_por_unidad == null) {
-            existeItem.peso_por_unidad = i.peso_por_unidad;
-            existeItem.unidad_peso     = i.unidad_peso;
-          }
-        }
-      });
-      persist(); renderInsumos(); renderProveedores(); renderBoletaHistorial();
-      _registrarArchivoSubido(file.name);
-      return true;
-    }
+  document.getElementById('btnConfirmar').style.display = '';
+  if (_boletaQueueRunning) {
+    document.getElementById('boletaQueueStep').textContent = 'Revisá y confirmá ↓';
+    return new Promise(resolve => { _boletaQueueResolve = resolve; });
   }
-
-  facturas.push({ id: crypto.randomUUID(), proveedorId: prov.id, nroBoleta: parsed.nro_boleta || null,
-                  fecha, hora: parsed.hora || null, importeTotal: parsed.importe_total || null,
-                  items: itemsFactura, creadaEn: new Date().toISOString() });
-
-  persist(); renderInsumos(); renderProveedores(); renderBoletaHistorial();
-  _registrarArchivoSubido(file.name);
   return true;
 }
 
@@ -3175,6 +3154,7 @@ function resetBoleta() {
   document.getElementById('boletaItemsWrap').innerHTML      = '<div style="color:var(--ink3);font-size:13px;padding:20px 0">Los ítems extraídos aparecen acá.</div>';
   document.getElementById('btnExtraer').disabled            = true;
   document.getElementById('btnConfirmar').style.display     = 'none';
+  if (_boletaQueueResolve) { const r = _boletaQueueResolve; _boletaQueueResolve = null; r(true); }
 }
 
 function confirmarBoleta() {
@@ -3267,6 +3247,7 @@ function confirmarBoleta() {
       ].filter(Boolean).join(' · ');
       toast(msg, pendientes.length ? 'warn' : 'success');
       if (pendientes.length) _mostrarRevisionNombres(pendientes);
+      if (_boletaFotoNombre) _registrarArchivoSubido(_boletaFotoNombre);
       resetBoleta();
       return;
     }

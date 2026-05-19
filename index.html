@@ -2821,17 +2821,42 @@ function confirmarBoleta() {
   }
   _bProvId = prov.id;
 
-  // Construir ítems de la factura
-  const itemsFactura = _bItems.map(item => {
-    // Registrar nombre en prov.items si es nuevo
+  // Registrar nombres nuevos en prov.items
+  _bItems.forEach(item => {
     if (item.nombre && !prov.items.some(it => it.nombreBoleta.toLowerCase() === item.nombre.toLowerCase()))
       prov.items.push({ id: crypto.randomUUID(), nombreBoleta: item.nombre, insumoId: null, unidad: item.unidad || '' });
+  });
 
+  // Construir ítems de la factura
+  const itemsFactura = _bItems.map(item => ({
+    nombre: item.nombre, cantidad: item.cantidad, unidad: item.unidad,
+    peso_por_unidad: item.peso_por_unidad ?? null, unidad_peso: item.unidad_peso ?? null,
+    precio_unitario: item.precio_unitario, precio_total: item.precio_total,
+    iva: item.iva ?? null,
+    insumoId: prov.items.find(it => it.nombreBoleta.toLowerCase() === (item.nombre||'').toLowerCase())?.insumoId || null,
+  }));
+
+  facturas.push({
+    id: crypto.randomUUID(), proveedorId: _bProvId,
+    nroBoleta: nroBoleta || null, fecha, hora, importeTotal,
+    items: itemsFactura, creadaEn: new Date().toISOString(),
+  });
+
+  // Crear insumos nuevos primero — después de esto prov.items tiene los insumoId actualizados
+  const { creados, pendientes } = altaInsumosDesdeFacturas(_bProvId, true);
+
+  // Propagar peso y precio a los insumos (ahora sí existen)
+  const facturaGuardada = facturas[facturas.length - 1];
+  facturaGuardada.items.forEach(item => {
     const mapping  = prov.items.find(it => it.nombreBoleta.toLowerCase() === (item.nombre||'').toLowerCase());
     const insumoId = mapping?.insumoId || null;
+    if (!insumoId) return;
 
-    // Guardar precio si hay insumo mapeado
-    if (insumoId && item.precio_unitario != null) {
+    // Actualizar insumoId en el ítem de la factura
+    item.insumoId = insumoId;
+
+    // Guardar precio
+    if (item.precio_unitario != null) {
       precios.push({
         id: crypto.randomUUID(), insumoId, proveedorId: _bProvId,
         fecha, nroBoleta: nroBoleta || null, nombreBoleta: item.nombre,
@@ -2843,8 +2868,8 @@ function confirmarBoleta() {
       });
     }
 
-    // Propagar presentación al insumo si viene peso por unidad
-    if (insumoId && item.peso_por_unidad && item.unidad_peso) {
+    // Propagar presentación al insumo
+    if (item.peso_por_unidad && item.unidad_peso) {
       const ins = insumos.find(i => i.id === insumoId);
       if (ins && !ins.presUnitWeight) {
         ins.presQty = 1; ins.presUnit = 'u';
@@ -2852,22 +2877,8 @@ function confirmarBoleta() {
         ins.unidad = item.unidad_peso;
       }
     }
-
-    return {
-      nombre: item.nombre, cantidad: item.cantidad, unidad: item.unidad,
-      peso_por_unidad: item.peso_por_unidad ?? null, unidad_peso: item.unidad_peso ?? null,
-      precio_unitario: item.precio_unitario, precio_total: item.precio_total,
-      iva: item.iva ?? null, insumoId,
-    };
   });
 
-  facturas.push({
-    id: crypto.randomUUID(), proveedorId: _bProvId,
-    nroBoleta: nroBoleta || null, fecha, hora, importeTotal,
-    items: itemsFactura, creadaEn: new Date().toISOString(),
-  });
-
-  const { creados, pendientes } = altaInsumosDesdeFacturas(_bProvId, true);
   persist(); renderInsumos(); renderProveedores();
   toast(`Factura guardada — ${itemsFactura.length} ítems${creados ? ` · ${creados} insumos de alta` : ''}`, 'success');
   if (pendientes.length) _mostrarRevisionNombres(pendientes);

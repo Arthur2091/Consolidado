@@ -1539,8 +1539,8 @@ function _onProvProductoChange() {
   const unidad   = ultimo.unidad || 'kg';
   const fecha    = ultimo.fecha  || '';
 
-  document.getElementById('fPrecioS').value = precio.toFixed(2);
-  document.getElementById('fPrecioC').value = '';
+  document.getElementById('fPrecioC').value = precio.toFixed(2);
+  document.getElementById('fPrecioS').value = '';
 
   document.getElementById('fPresQty').value  = 1;
   document.getElementById('fPresUnit').value = unidad;
@@ -1596,8 +1596,8 @@ function _aplicarBoletaItem(provId, itemInsumoId) {
   const ultimo = regs[0];
   const unidad = ultimo.unidad || 'kg';
 
-  document.getElementById('fPrecioS').value = ultimo.precioUnitario.toFixed(2);
-  document.getElementById('fPrecioC').value = '';
+  document.getElementById('fPrecioC').value = ultimo.precioUnitario.toFixed(2);
+  document.getElementById('fPrecioS').value = '';
   document.getElementById('fPresQty').value  = 1;
   document.getElementById('fPresUnit').value = unidad;
   _updatePresEquiv();

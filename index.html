@@ -2799,26 +2799,16 @@ Si no podés leer algún campo con certeza, ponés null.`;
     }
   }
 
-  const itemsFactura = parsed.items.map(item => {
-    const mapping  = prov.items.find(it => it.nombreBoleta.toLowerCase() === item.nombre?.toLowerCase());
-    const insumoId = mapping?.insumoId || null;
+  // Pre-register item names in prov.items for mapping (no save yet — confirmarBoleta saves everything)
+  parsed.items.forEach(item => {
     if (item.nombre) {
       const exists = prov.items.some(it => it.nombreBoleta.toLowerCase() === item.nombre.toLowerCase());
-      if (!exists) prov.items.push({ id: crypto.randomUUID(), nombreBoleta: item.nombre, insumoId, unidad: item.unidad || '' });
+      if (!exists) prov.items.push({ id: crypto.randomUUID(), nombreBoleta: item.nombre, insumoId: null, unidad: item.unidad || '' });
     }
-    if (insumoId && item.precio_unitario != null) {
-      precios.push({ id: crypto.randomUUID(), insumoId, proveedorId: prov.id, fecha, nroBoleta: parsed.nro_boleta || null,
-        nombreBoleta: item.nombre, cantidad: item.cantidad, unidad: item.unidad,
-        pesoPorUnidad: item.peso_por_unidad ?? null, unidadPeso: item.unidad_peso ?? null,
-        precioUnitario: Number(item.precio_unitario),
-        precioTotal: item.precio_total != null ? Number(item.precio_total) : null, fuente: 'foto' });
-    }
-    return { nombre: item.nombre, cantidad: item.cantidad, unidad: item.unidad,
-             peso_por_unidad: item.peso_por_unidad ?? null, unidad_peso: item.unidad_peso ?? null,
-             precio_unitario: item.precio_unitario, precio_total: item.precio_total, iva: item.iva ?? null, insumoId };
   });
 
   _boletaProvId = prov.id;
+  _boletaProvNombre = parsed.proveedor || null;
   _boletaItems = parsed.items.map(it => {
     if (it.precio_total == null && it.precio_unitario != null && it.cantidad != null) {
       it.precio_total = it.peso_por_unidad

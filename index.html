@@ -1914,6 +1914,7 @@ function openEditProvModal(id) {
   openModal('modalProveedor');
 }
 
+
 function saveProveedor() {
   const nombre = document.getElementById('pNombre').value.trim();
   if (!nombre) { toast('El nombre es obligatorio', 'error'); return; }
@@ -2439,49 +2440,44 @@ function _revisionConfirmar() {
 }
 
 function renderFacturaDetalle(facturaId, provId) {
-  const screen  = document.getElementById('proveedoresScreen');
-  const f       = facturas.find(x => x.id === facturaId);
-  const prov    = proveedores.find(p => p.id === provId);
+  const screen = document.getElementById('proveedoresScreen');
+  const f    = facturas.find(x => x.id === facturaId);
+  const prov = proveedores.find(p => p.id === provId);
   if (!f) return;
-
+  const nd  = v => (v != null && v !== '') ? v : '—';
+  const fld = (label, val, hl) => `
+    <div style="display:flex;flex-direction:column;gap:1px">
+      <div style="font-size:.65rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.04em">${label}</div>
+      <div style="font-size:.82rem;font-weight:600;color:${hl && val != null && val !== '' ? 'var(--info)' : val != null && val !== '' ? 'var(--ink)' : 'var(--ink3)'}">${nd(val)}</div>
+    </div>`;
   screen.innerHTML = `
     <div style="display:flex;gap:.75rem;margin-bottom:1rem">
       <div style="flex:1;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.2rem;cursor:pointer" onclick="renderProveedorFacturas('${provId}')">
-      <div style="font-size:.72rem;color:var(--ink3);text-transform:uppercase;font-weight:700;margin-bottom:.6rem">← ${prov?.nombre}</div>
-      <div style="display:flex;gap:2rem;flex-wrap:wrap">
-        <div><div style="font-size:.72rem;color:var(--ink3);text-transform:uppercase;font-weight:700">N° Factura</div><div style="font-weight:700;font-size:1rem">${f.nroBoleta || '—'}</div></div>
-        <div><div style="font-size:.72rem;color:var(--ink3);text-transform:uppercase;font-weight:700">Fecha</div><div style="font-weight:600">${f.fecha}</div></div>
-        <div><div style="font-size:.72rem;color:var(--ink3);text-transform:uppercase;font-weight:700">Hora</div><div style="font-weight:600">${f.hora || '—'}</div></div>
-        <div><div style="font-size:.72rem;color:var(--ink3);text-transform:uppercase;font-weight:700">Total</div><div style="font-weight:700;color:var(--accent);font-size:1.1rem">${f.importeTotal ? pesos(f.importeTotal) : '—'}</div></div>
+        <div style="font-size:.72rem;color:var(--ink3);text-transform:uppercase;font-weight:700;margin-bottom:.6rem">← ${prov?.nombre}</div>
+        <div style="display:flex;gap:2rem;flex-wrap:wrap">
+          <div><div style="font-size:.72rem;color:var(--ink3);text-transform:uppercase;font-weight:700">N° Factura</div><div style="font-weight:700;font-size:1rem">${f.nroBoleta || '—'}</div></div>
+          <div><div style="font-size:.72rem;color:var(--ink3);text-transform:uppercase;font-weight:700">Fecha</div><div style="font-weight:600">${f.fecha}</div></div>
+          <div><div style="font-size:.72rem;color:var(--ink3);text-transform:uppercase;font-weight:700">Hora</div><div style="font-weight:600">${f.hora || '—'}</div></div>
+          <div><div style="font-size:.72rem;color:var(--ink3);text-transform:uppercase;font-weight:700">Total</div><div style="font-weight:700;color:var(--accent);font-size:1.1rem">${f.importeTotal ? pesos(f.importeTotal) : '—'}</div></div>
+        </div>
       </div>
+      <button onclick="eliminarFactura('${f.id}','${provId}')" style="background:none;border:1px solid var(--danger);color:var(--danger);border-radius:var(--radius);padding:.5rem .9rem;cursor:pointer;font-size:.85rem;white-space:nowrap;align-self:flex-start">Eliminar</button>
     </div>
-      <button onclick="eliminarFactura('${f.id}','${provId}')" style="background:none;border:1px solid var(--danger);color:var(--danger);border-radius:var(--radius);padding:.5rem .9rem;cursor:pointer;font-size:.85rem;white-space:nowrap">Eliminar</button>
-    </div>
+    <button onclick="openEditFactura('${facturaId}','${provId}')" style="margin-bottom:.75rem;background:var(--info);color:#fff;border:none;border-radius:var(--radius);padding:.5rem 1.2rem;cursor:pointer;font:600 14px var(--font)">Editar boleta</button>
     <div style="display:flex;flex-direction:column;gap:.5rem">
-      ${f.items.map(item => {
-        const nd  = v => v != null && v !== '' ? v : '—';
-        const fld = (label, val, highlight) => `
-          <div style="display:flex;flex-direction:column;gap:1px">
-            <div style="font-size:.65rem;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.04em">${label}</div>
-            <div style="font-size:.82rem;font-weight:600;color:${highlight ? 'var(--info)' : val != null && val !== '' ? 'var(--ink)' : 'var(--ink3)'}">${nd(val)}</div>
-          </div>`;
-        return `
+      ${f.items.map(item => `
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem 1rem">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:.6rem">
-            <div style="font-weight:700;font-size:.95rem">${item.nombre}</div>
-            <button onclick="openEditFactura('${facturaId}','${provId}')" style="font-size:11px;padding:2px 10px;background:none;border:1px solid var(--border);border-radius:6px;color:var(--ink3);cursor:pointer;white-space:nowrap;flex-shrink:0">Editar</button>
-          </div>
+          <div style="font-weight:700;font-size:.95rem;margin-bottom:.5rem">${item.nombre}</div>
           <div style="display:flex;gap:1rem;flex-wrap:wrap">
-            ${fld('Cantidad',      item.cantidad)}
-            ${fld('Unidad',        item.unidad)}
-            ${fld('Peso/u',        item.peso_por_unidad, true)}
-            ${fld('U. peso',       item.unidad_peso, true)}
-            ${fld('IVA',           item.iva != null ? item.iva + '%' : null)}
-            ${fld('$ Unitario',    item.precio_unitario != null ? pesos(item.precio_unitario) : null)}
-            ${fld('$ Total',       item.precio_total    != null ? pesos(item.precio_total)    : null)}
+            ${fld('Cantidad',   item.cantidad)}
+            ${fld('Unidad',     item.unidad)}
+            ${fld('Peso/u',     item.peso_por_unidad, true)}
+            ${fld('U. peso',    item.unidad_peso, true)}
+            ${fld('IVA',        item.iva != null ? item.iva + '%' : null)}
+            ${fld('$ Unitario', item.precio_unitario != null ? pesos(item.precio_unitario) : null)}
+            ${fld('$ Total',    item.precio_total    != null ? pesos(item.precio_total)    : null)}
           </div>
-        </div>`;
-      }).join('')}
+        </div>`).join('')}
     </div>`;
 }
 
@@ -2491,31 +2487,24 @@ let _efItems = [];
 function openEditFactura(facturaId, provId) {
   const f = facturas.find(x => x.id === facturaId);
   if (!f) return;
-  document.getElementById('efNro').value   = f.nroBoleta || '';
-  document.getElementById('efFecha').value = f.fecha || '';
-  document.getElementById('efHora').value  = f.hora || '';
-  document.getElementById('efTotal').value = f.importeTotal || '';
-  document.getElementById('efFacturaId').value = facturaId;
-  document.getElementById('efProvId').value    = provId;
-  const efProv = proveedores.find(p => p.id === provId);
-  const _normEf = s => (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
-  _efItems = (f.items || []).map(it => {
-    const item = {...it};
-    if (item.peso_por_unidad == null || !item.unidad_peso) {
-      const insumoId = item.insumoId
-        || efProv?.items?.find(pi => _normEf(pi.nombreBoleta) === _normEf(item.nombre))?.insumoId;
-      const ins = (insumoId ? insumos.find(i => i.id === insumoId) : null)
-        || insumos.find(i => _normEf(i.nombre) === _normEf(item.nombre)
-             || (i.aliases||[]).some(a => _normEf(a) === _normEf(item.nombre)));
-      if (ins?.presUnitWeight && ins?.presUnitWeightUnit) {
-        if (item.peso_por_unidad == null) item.peso_por_unidad = ins.presUnitWeight;
-        if (!item.unidad_peso)            item.unidad_peso     = ins.presUnitWeightUnit;
-      }
-    }
-    return item;
-  });
+  document.getElementById('efNro').value        = f.nroBoleta || '';
+  document.getElementById('efFecha').value      = f.fecha || '';
+  document.getElementById('efHora').value       = f.hora || '';
+  document.getElementById('efTotal').value      = f.importeTotal || '';
+  document.getElementById('efFacturaId').value  = facturaId;
+  document.getElementById('efProvId').value     = provId;
+  _efItems = (f.items || []).map(it => ({ ...it }));
   _efRefreshItems();
   openModal('modalEditFactura');
+}
+
+function _efEsc(s) { return String(s ?? '').replace(/"/g, '&quot;'); }
+function _efSet(i, field, val) { _efItems[i][field] = val; }
+function _efRemove(i) { _efItems.splice(i, 1); _efRefreshItems(); }
+function _efAddItem() {
+  _efItems.push({ nombre: '', cantidad: null, unidad: '', precio_total: null, precio_unitario: null, peso_por_unidad: null, unidad_peso: null, iva: null });
+  _efRefreshItems();
+  document.getElementById('efItemsList').querySelectorAll('input[data-field="nombre"]')[_efItems.length - 1]?.focus();
 }
 
 function _efRefreshItems() {
@@ -2525,8 +2514,8 @@ function _efRefreshItems() {
       <div style="display:flex;gap:6px;align-items:flex-end">
         <div style="flex:2">
           ${lbl('Nombre')}
-          <input style="width:100%;font:13px var(--font);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none;box-sizing:border-box"
-            placeholder="Nombre" value="${_efEsc(it.nombre||'')}" oninput="_efSet(${i},'nombre',this.value)">
+          <input data-field="nombre" style="width:100%;font:13px var(--font);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none;box-sizing:border-box"
+            placeholder="Nombre" value="${_efEsc(it.nombre)}" oninput="_efSet(${i},'nombre',this.value)">
         </div>
         <button style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:0 2px;line-height:1;flex-shrink:0;margin-bottom:2px" onclick="_efRemove(${i})">✕</button>
       </div>
@@ -2534,49 +2523,40 @@ function _efRefreshItems() {
         <div>
           ${lbl('Cant.')}
           <input style="width:60px;font:13px var(--mono);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-            type="number" step="any" value="${it.cantidad??''}" oninput="_efSet(${i},'cantidad',parseFloat(this.value)||null)">
+            type="number" step="any" value="${it.cantidad??''}" oninput="_efSet(${i},'cantidad',this.value===''?null:parseFloat(this.value))">
         </div>
         <div>
           ${lbl('Unidad')}
           <input style="width:52px;font:13px var(--mono);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-            value="${_efEsc(it.unidad||'')}" oninput="_efSet(${i},'unidad',this.value)">
+            value="${_efEsc(it.unidad)}" oninput="_efSet(${i},'unidad',this.value)">
         </div>
         <div>
           ${lbl('Peso/u')}
           <input style="width:70px;font:13px var(--mono);padding:4px 8px;border:1.5px solid var(--info);border-radius:6px;background:#EFF6FF;outline:none"
-            type="number" step="any" placeholder="ej: 25" value="${it.peso_por_unidad??''}" oninput="_efSet(${i},'peso_por_unidad',parseFloat(this.value)||null)">
+            type="number" step="any" placeholder="ej: 25" value="${it.peso_por_unidad??''}" oninput="_efSet(${i},'peso_por_unidad',this.value===''?null:parseFloat(this.value))">
         </div>
         <div>
           ${lbl('U. peso')}
           <input style="width:56px;font:13px var(--mono);padding:4px 8px;border:1.5px solid var(--info);border-radius:6px;background:#EFF6FF;outline:none"
-            placeholder="kg/g/L" value="${_efEsc(it.unidad_peso||'')}" oninput="_efSet(${i},'unidad_peso',this.value)">
+            placeholder="kg/g/L" value="${_efEsc(it.unidad_peso)}" oninput="_efSet(${i},'unidad_peso',this.value)">
         </div>
         <div>
           ${lbl('IVA %')}
           <input style="width:56px;font:13px var(--mono);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-            type="number" step="any" placeholder="21" value="${it.iva??''}" oninput="_efSet(${i},'iva',parseFloat(this.value)||null)">
+            type="number" step="any" placeholder="21" value="${it.iva??''}" oninput="_efSet(${i},'iva',this.value===''?null:parseFloat(this.value))">
         </div>
         <div>
           ${lbl('$ Unit.')}
           <input style="width:88px;font:13px var(--mono);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-            type="number" step="0.01" placeholder="0.00" value="${it.precio_unitario??''}" oninput="_efSet(${i},'precio_unitario',parseFloat(this.value)||null)">
+            type="number" step="0.01" placeholder="0.00" value="${it.precio_unitario??''}" oninput="_efSet(${i},'precio_unitario',this.value===''?null:parseFloat(this.value))">
         </div>
         <div>
           ${lbl('$ Total')}
           <input style="width:88px;font:13px var(--mono);padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-            type="number" step="0.01" placeholder="0.00" value="${it.precio_total??''}" oninput="_efSet(${i},'precio_total',parseFloat(this.value)||null)">
+            type="number" step="0.01" placeholder="0.00" value="${it.precio_total??''}" oninput="_efSet(${i},'precio_total',this.value===''?null:parseFloat(this.value))">
         </div>
       </div>
     </div>`).join('');
-}
-
-function _efEsc(s) { return String(s).replace(/"/g, '&quot;'); }
-function _efSet(i, field, val) { _efItems[i][field] = val; }
-function _efRemove(i) { _efItems.splice(i, 1); _efRefreshItems(); }
-function _efAddItem() {
-  _efItems.push({ nombre: '', cantidad: null, unidad: '', precio_total: null, precio_unitario: null, peso_por_unidad: null, unidad_peso: '' });
-  _efRefreshItems();
-  document.getElementById('efItemsList').querySelectorAll('input[placeholder="Nombre"]')[_efItems.length - 1]?.focus();
 }
 
 function saveEditFactura() {
@@ -2587,20 +2567,18 @@ function saveEditFactura() {
   f.nroBoleta    = document.getElementById('efNro').value.trim();
   f.fecha        = document.getElementById('efFecha').value;
   f.hora         = document.getElementById('efHora').value;
-  f.importeTotal = parseFloat(document.getElementById('efTotal').value) || null;
-  f.items        = _efItems;
-  // Propagar peso al insumo si se cargó acá
+  f.importeTotal = document.getElementById('efTotal').value === '' ? null : parseFloat(document.getElementById('efTotal').value);
+  f.items        = _efItems.map(it => ({ ...it }));
   const prov = proveedores.find(p => p.id === provId);
-  _efItems.forEach(item => {
+  f.items.forEach(item => {
     if (!item.peso_por_unidad || !item.unidad_peso) return;
-    const mapping = prov?.items?.find(pi => (pi.nombreBoleta||'').toLowerCase() === (item.nombre||'').toLowerCase());
+    const mapping  = prov?.items?.find(pi => (pi.nombreBoleta||'').toLowerCase() === (item.nombre||'').toLowerCase());
     const insumoId = item.insumoId || mapping?.insumoId;
     if (!insumoId) return;
     const ins = insumos.find(i => i.id === insumoId);
     if (ins && !ins.presUnitWeight) {
       ins.presQty = 1; ins.presUnit = 'u';
-      ins.presUnitWeight = item.peso_por_unidad;
-      ins.presUnitWeightUnit = item.unidad_peso;
+      ins.presUnitWeight = item.peso_por_unidad; ins.presUnitWeightUnit = item.unidad_peso;
       ins.unidad = item.unidad_peso;
     }
   });

@@ -2589,6 +2589,7 @@ function saveEditFactura() {
 /* ── BOLETAS ────────────────────────────────────────────────────── */
 let _bImg64 = null, _bImgMime = null, _bFile = null;
 let _bItems = [], _bProvId = null, _bProvName = null;
+let _bQueue = [], _bQueueResolve = null;
 
 function saveApiKey() {
   const key = document.getElementById('apikeyInput').value.trim();
@@ -2610,27 +2611,60 @@ function onBoletaFoto(e) {
   const files = Array.from(e.target.files);
   e.target.value = '';
   if (!files.length) return;
-  const ya = JSON.parse(localStorage.getItem('boletaArchivos') || '[]');
-  const dup = files.filter(f => ya.includes(f.name));
+  const ya      = JSON.parse(localStorage.getItem('boletaArchivos') || '[]');
+  const limpios = files.filter(f => !ya.includes(f.name));
+  const dup     = files.filter(f =>  ya.includes(f.name));
   if (dup.length) {
     const nombres = dup.map(f => `"${f.name}"`).join(', ');
     document.getElementById('boletaDupText').textContent =
       `${nombres} ya ${dup.length === 1 ? 'fue subido' : 'fueron subidos'} antes.`;
     document.getElementById('boletaDupBanner').style.display = 'flex';
-    window._bPending = files[0];
+    window._bPending = { todos: files, limpios };
     return;
   }
-  _bCargar(files[0]);
+  _bDespachar(files);
 }
 
 function _confirmarDuplicado() {
   document.getElementById('boletaDupBanner').style.display = 'none';
-  if (window._bPending) { _bCargar(window._bPending); window._bPending = null; }
+  if (window._bPending) { _bDespachar(window._bPending.todos); window._bPending = null; }
 }
 
 function _cancelarDuplicado() {
   document.getElementById('boletaDupBanner').style.display = 'none';
+  if (window._bPending?.limpios?.length) _bDespachar(window._bPending.limpios);
   window._bPending = null;
+}
+
+function _bDespachar(files) {
+  if (files.length === 1) _bCargar(files[0]);
+  else _bIniciarCola(files);
+}
+
+function _bIniciarCola(files) {
+  _bQueue = [...files];
+  document.getElementById('boletaQueueBar').style.display = 'flex';
+  document.getElementById('btnExtraer').disabled = true;
+  _bProcesarCola(0, 0, []);
+}
+
+async function _bProcesarCola(idx, ok, errs) {
+  const total = _bQueue.length;
+  if (idx >= total) {
+    document.getElementById('boletaQueueBar').style.display = 'none';
+    toast(`Cola finalizada — ${ok} guardadas${errs.length ? `, ${errs.length} errores` : ''}`, errs.length ? 'warn' : 'success');
+    return;
+  }
+  const file = _bQueue[idx];
+  document.getElementById('boletaQueueProgress').style.width = Math.round((idx / total) * 100) + '%';
+  document.getElementById('boletaQueueText').textContent     = file.name;
+  document.getElementById('boletaQueueCount').textContent    = `${idx + 1} / ${total}`;
+  document.getElementById('boletaQueueStep').textContent     = 'Cargando…';
+  _bCargar(file);
+  document.getElementById('boletaQueueStep').textContent = 'Revisá y confirmá ↓';
+  await new Promise(resolve => { _bQueueResolve = resolve; });
+  document.getElementById('boletaQueueProgress').style.width = Math.round(((idx + 1) / total) * 100) + '%';
+  _bProcesarCola(idx + 1, ok + 1, errs);
 }
 
 function _bCargar(file) {
@@ -2855,6 +2889,7 @@ function resetBoleta() {
   document.getElementById('boletaItemsWrap').innerHTML      = '<div style="color:var(--ink3);font-size:13px;padding:20px 0">Los ítems extraídos aparecen acá.</div>';
   document.getElementById('btnExtraer').disabled            = true;
   document.getElementById('btnConfirmar').style.display     = 'none';
+  if (_bQueueResolve) { const r = _bQueueResolve; _bQueueResolve = null; r(); }
 }
 
 function eliminarFactura(facturaId, provId) {

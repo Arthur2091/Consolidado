@@ -3904,6 +3904,13 @@ function _fmtPres(ins) {
   else if (ins.presUnit === 'g')  { costo = (precio / ins.presQty) * 1000; label = '/kg'; }
   else if (ins.presUnit === 'L')  { costo = precio / ins.presQty;          label = '/L';  }
   else if (ins.presUnit === 'ml') { costo = (precio / ins.presQty) * 1000; label = '/L';  }
+  else if (ins.presUnit === 'u' && ins.presUnitWeight && ins.presUnitWeightUnit) {
+    const _N = { kg:1, g:0.001, L:1, ml:0.001 };
+    const totalNorm = ins.presQty * ins.presUnitWeight * (_N[ins.presUnitWeightUnit] || 1);
+    const isVol = ['L','ml'].includes(ins.presUnitWeightUnit);
+    costo = precio / totalNorm;
+    label = isVol ? '/L' : '/kg';
+  }
   else                            { costo = precio / ins.presQty;          label = '/u';  }
   return `${ins.presQty}${ins.presUnit} · $${Math.round(costo).toLocaleString('es-AR')}${label}`;
 }
@@ -5036,7 +5043,10 @@ function verReceta(recetaId) {
         const st    = ins  ? calcCostoIng(ins, ing.cantidad, ing.unidad)
                    : subR ? (() => { const c = _calcCostoRecetaUnd(ing.recetaId, new Set()); const q = Math.max(0, parseFloat(ing.cantidad)||0); return (!isNaN(c) && q>0) ? c*q : null; })()
                    : null;
-        const info  = ins?.presQty ? `${ins.presQty}${ins.presUnit}`
+        const info  = ins?.presQty
+                    ? (ins.presUnit === 'u' && ins.presUnitWeight && ins.presUnitWeightUnit
+                        ? `${ins.presQty}u=${ins.presUnitWeight}${ins.presUnitWeightUnit}`
+                        : `${ins.presQty}${ins.presUnit}`)
                     : ins ? '<span style="color:var(--warn);font-size:11px">sin pres.</span>'
                     : subR ? `<span style="font-size:11px;color:var(--ink3)">rinde ${subR.rinde||1}</span>`
                     : '';

@@ -3169,6 +3169,8 @@ function confirmarBoleta() {
     _boletaProvNombre = typed;
   }
 
+  console.log('[confirmar] _boletaItems:', JSON.stringify(_boletaItems.map(i => ({n:i.nombre, p:i.peso_por_unidad, up:i.unidad_peso}))));
+
   // Auto-create provider if new
   if (!_boletaProvId) {
     const nuevo = { id: crypto.randomUUID(), nombre: _boletaProvNombre.toUpperCase(), telefono: '', email: '', notas: '', pago: 'transferencia', items: [] };

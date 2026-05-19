@@ -3547,9 +3547,7 @@ function deleteEgreso(id) {
 /* ── PRESENTACION / COSTO ───────────────────────────────────────── */
 function _fmtPres(ins) {
   if (!ins.presQty || !ins.presUnit) return '—';
-  if (ins.presUnitWeight && ins.presUnitWeightUnit)
-    return `${ins.presQty}${ins.presUnit} · ${ins.presUnitWeight}${ins.presUnitWeightUnit}`;
-  return `${ins.presQty}${ins.presUnit}`;
+  return `${ins.presQty} ${ins.presUnit}`;
 }
 
 // Base units in grams/ml/units — includes culinary measures

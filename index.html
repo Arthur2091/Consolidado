@@ -2787,6 +2787,8 @@ async function extraerBoleta() {
   }
 }
 
+function _bSet(idx, field, val) { _bItems[idx][field] = val; }
+
 function _bRenderItems() {
   const wrap = document.getElementById('boletaItemsWrap');
   if (!_bItems.length) { wrap.innerHTML = '<div style="color:var(--ink3);font-size:13px;padding:20px 0">Sin ítems.</div>'; return; }
@@ -2796,26 +2798,26 @@ function _bRenderItems() {
       <div style="display:flex;flex-direction:column;gap:6px">
         <input type="text" value="${v(item.nombre)}" placeholder="Nombre"
           style="font:600 13px var(--font);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none;width:100%;box-sizing:border-box"
-          oninput="_bItems[${idx}].nombre=this.value">
+          oninput="_bSet(${idx},'nombre',this.value)">
         <div style="display:flex;gap:6px;flex-wrap:wrap">
           <input type="number" value="${item.cantidad??''}" placeholder="Cant."
             style="width:65px;font:13px var(--mono);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-            oninput="_bItems[${idx}].cantidad=parseFloat(this.value)||null">
+            oninput="_bSet(${idx},'cantidad',parseFloat(this.value)||null)">
           <input type="text" value="${v(item.unidad)}" placeholder="Und."
             style="width:52px;font:13px var(--mono);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-            oninput="_bItems[${idx}].unidad=this.value">
-          <input type="number" step="0.01" value="${item.peso_por_unidad??''}" placeholder="Peso/u"
+            oninput="_bSet(${idx},'unidad',this.value)">
+          <input type="number" step="any" value="${item.peso_por_unidad??''}" placeholder="Peso/u"
             style="width:70px;font:13px var(--mono);padding:4px 7px;border:1.5px solid var(--info);border-radius:6px;background:#EFF6FF;outline:none"
-            oninput="_bItems[${idx}].peso_por_unidad=parseFloat(this.value)||null">
+            oninput="_bSet(${idx},'peso_por_unidad',this.value===''?null:parseFloat(this.value))">
           <input type="text" value="${v(item.unidad_peso)}" placeholder="u.peso"
             style="width:52px;font:13px var(--mono);padding:4px 7px;border:1.5px solid var(--info);border-radius:6px;background:#EFF6FF;outline:none"
-            oninput="_bItems[${idx}].unidad_peso=this.value">
+            oninput="_bSet(${idx},'unidad_peso',this.value)">
           <input type="number" step="0.01" value="${item.precio_unitario??''}" placeholder="$ Unit."
             style="flex:1;min-width:70px;font:13px var(--mono);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-            oninput="_bItems[${idx}].precio_unitario=parseFloat(this.value)||null">
+            oninput="_bSet(${idx},'precio_unitario',this.value===''?null:parseFloat(this.value))">
           <input type="number" step="0.01" value="${item.precio_total??''}" placeholder="$ Total"
             style="flex:1;min-width:70px;font:13px var(--mono);padding:4px 7px;border:1px solid var(--border);border-radius:6px;background:var(--surface);outline:none"
-            oninput="_bItems[${idx}].precio_total=parseFloat(this.value)||null">
+            oninput="_bSet(${idx},'precio_total',this.value===''?null:parseFloat(this.value))">
         </div>
       </div>
       <button class="btn btn-ghost btn-sm" style="color:var(--danger);padding:4px 6px;align-self:start" onclick="_bItems.splice(${idx},1);_bRenderItems()">✕</button>
@@ -2903,6 +2905,7 @@ function confirmarBoleta() {
     }
   });
 
+  console.log('[boleta] items guardados:', JSON.stringify(facturas[facturas.length-1].items.map(x => ({n:x.nombre,peso:x.peso_por_unidad,upeso:x.unidad_peso}))));
   persist(); renderInsumos(); renderProveedores();
   toast(`Factura guardada — ${itemsFactura.length} ítems${creados ? ` · ${creados} insumos de alta` : ''}`, 'success');
   if (pendientes.length) _mostrarRevisionNombres(pendientes);

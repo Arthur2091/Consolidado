@@ -1,0 +1,94 @@
+fecha;hora;tipo;descripcion;contraparte;medio_de_pago;estado;monto
+02/03/2026;19:26;Pago de crédito;Pago de cuota 1 de 1 - Créditos de Mercado Pago;Créditos de Mercado Pago;Dinero disponible - Entidad: Mercado Pago;Aprobado;7.800,00
+03/03/2026;14:56;Pago de crédito;Pago de cuota 1 de 1 - Créditos de Mercado Pago;Créditos de Mercado Pago;Dinero disponible - Entidad: Mercado Pago;Aprobado;39.100,00
+03/03/2026;18:32;Pago de crédito;Pago de cuota 1 de 1 - Créditos de Mercado Pago;Créditos de Mercado Pago;Dinero disponible - Entidad: Mercado Pago;Aprobado;95.640,85
+04/03/2026;03:46;Pago online;Pago online en Apple;Apple;Mastercard prepaga - Entidad: Mercado Pago;Aprobado;30.024,92
+04/03/2026;03:54;Pago online;Pago online en Apple;Apple;Mastercard prepaga - Entidad: Mercado Pago;Aprobado;9.747,96
+04/03/2026;02:27;Pago online;Pago online en Netflix;Netflix;Mastercard prepaga - Entidad: Mercado Pago;Aprobado;26.975,87
+04/03/2026;11:48;Transferencia enviada;Transferencia enviada a Distribuidora Semas Sa;Distribuidora Semas Sa;Dinero disponible - Entidad: Mercado Pago;Aprobado;38.664,00
+04/03/2026;14:52;Pago online;Pago online en Canva;Canva;Mastercard prepaga - Entidad: Mercado Pago;Aprobado;26.632,38
+05/03/2026;10:06;Transferencia enviada;Transferencia enviada a Sebastian Daniel Weckl;Sebastian Daniel Weckl;Dinero disponible - Entidad: Mercado Pago;Aprobado;88.000,00
+05/03/2026;10:20;Pago;Pago en Logistica La Serenisima Sa;Logistica La Serenisima Sa;Dinero disponible - Entidad: Mercado Pago;Aprobado;46.129,00
+05/03/2026;11:07;Transferencia enviada;Transferencia enviada a Tostadero Porto Expreso S.A.;Tostadero Porto Expreso S.A.;Dinero disponible - Entidad: Mercado Pago;Aprobado;240.824,00
+05/03/2026;14:12;Transferencia enviada;Transferencia enviada a Tostadero Porto Expreso S.A.;Tostadero Porto Expreso S.A.;Dinero disponible - Entidad: Mercado Pago;Aprobado;229.900,00
+06/03/2026;12:56;Transferencia enviada;Transferencia enviada a Marcelo Fabian Vera;Marcelo Fabian Vera;Dinero disponible - Entidad: Mercado Pago;Aprobado;62.000,00
+06/03/2026;13:25;Transferencia enviada;Transferencia enviada a Rocio Elisa Lopez;Rocio Elisa Lopez;Dinero disponible - Entidad: Mercado Pago;Aprobado;9.500,00
+06/03/2026;18:06;Transferencia enviada;Transferencia enviada a Victoria Tola Romero;Victoria Tola Romero;Dinero disponible - Entidad: Mercado Pago;Aprobado;112.700,00
+07/03/2026;09:27;Transferencia enviada;Transferencia enviada a Baigorri Alonso Nicolas Y Delgiudice Rau;Baigorri Alonso Nicolas Y Delgiudice Rau;Dinero disponible - Entidad: Mercado Pago;Aprobado;117.300,00
+07/03/2026;10:54;Transferencia enviada;Transferencia enviada a Diego Hernan Lay#O;Diego Hernan Lay#O;Dinero disponible - Entidad: Mercado Pago;Aprobado;500.000,00
+07/03/2026;13:45;Transferencia enviada;Transferencia enviada a Diego Hernan Lay#O;Diego Hernan Lay#O;Dinero disponible - Entidad: Mercado Pago;Aprobado;150.000,00
+07/03/2026;22:40;Pago;Pago a Rappi Arg Sas;Rappi Arg Sas;Dinero disponible - Entidad: Mercado Pago;Aprobado;26.680,00
+07/03/2026;23:21;Pago online;Pago online en Pedidosya Heladeri;Pedidosya Heladeri;Mastercard prepaga - Entidad: Mercado Pago;Aprobado;12.769,00
+08/03/2026;16:34;Pago;Pago a Rappi Arg Sas;Rappi Arg Sas;Dinero disponible - Entidad: Mercado Pago;Aprobado;18.000,00
+09/03/2026;10:24;Transferencia enviada;Transferencia enviada a Diego Hernan Lay#O;Diego Hernan Lay#O;Dinero disponible - Entidad: Mercado Pago;Aprobado;300.000,00
+09/03/2026;11:38;Transferencia enviada;Transferencia enviada a Soy Botiquera S.R.L .-;Soy Botiquera S.R.L .-;Dinero disponible - Entidad: Mercado Pago;Aprobado;97.759,16
+09/03/2026;14:58;Transferencia enviada;Transferencia enviada a Victoria Tola Romero;Victoria Tola Romero;Dinero disponible - Entidad: Mercado Pago;Aprobado;89.400,00
+09/03/2026;18:35;Transferencia enviada;Transferencia enviada a Diego Hernan Lay#O;Diego Hernan Lay#O;Dinero disponible - Entidad: Mercado Pago;Aprobado;400.000,00
+09/03/2026;20:12;Transferencia enviada;Transferencia enviada a Fenghua Wang;Fenghua Wang;Dinero disponible - Entidad: Mercado Pago;Aprobado;60.610,00
+10/03/2026;09:10;Transferencia enviada;Transferencia enviada a Albean Sa;Albean Sa;Dinero disponible - Entidad: Mercado Pago;Aprobado;52.095,78
+10/03/2026;12:50;Transferencia enviada;Transferencia enviada a Diego Hernan Lay#O;Diego Hernan Lay#O;Dinero disponible - Entidad: Mercado Pago;Aprobado;100.000,00
+10/03/2026;16:44;Transferencia enviada;Transferencia enviada a Tony Lin;Tony Lin;Dinero disponible - Entidad: Mercado Pago;Aprobado;9.000,00
+10/03/2026;20:47;Pago;Pago en Tecnologia Datri Srl;Tecnologia Datri Srl;Dinero disponible - Entidad: Mercado Pago;Aprobado;65.676,00
+11/03/2026;09:16;Pago;Pago en Logistica La Serenisima Sa;Logistica La Serenisima Sa;Dinero disponible - Entidad: Mercado Pago;Aprobado;46.129,00
+11/03/2026;11:06;Transferencia enviada;Transferencia enviada a Kevin Norberto Mejuto;Kevin Norberto Mejuto;Dinero disponible - Entidad: Mercado Pago;Aprobado;226.900,00
+11/03/2026;15:01;Transferencia enviada;Transferencia enviada a Diego Hernan Lay#O;Diego Hernan Lay#O;Dinero disponible - Entidad: Mercado Pago;Aprobado;200.000,00
+11/03/2026;15:21;Pago online;Pago online en Claro;Claro;Mastercard prepaga - Entidad: Mercado Pago;Aprobado;37.009,16
+12/03/2026;11:58;Transferencia enviada;Transferencia enviada a Tostadero Porto Expreso S.A.;Tostadero Porto Expreso S.A.;Dinero disponible - Entidad: Mercado Pago;Aprobado;179.866,50
+12/03/2026;20:42;Pago en tienda física;Pago en tienda física en Farmacity;Farmacity;Dinero disponible - Entidad: Mercado Pago;Aprobado;76.143,00
+13/03/2026;09:34;Pago;Pago en Logistica La Serenisima Sa;Logistica La Serenisima Sa;Dinero disponible - Entidad: Mercado Pago;Aprobado;71.151,00
+13/03/2026;13:52;Transferencia enviada;Transferencia enviada a Victoria Tola Romero;Victoria Tola Romero;Dinero disponible - Entidad: Mercado Pago;Aprobado;128.400,00
+13/03/2026;18:00;Transferencia enviada;Transferencia enviada a Belizan Eugenia Be;Belizan Eugenia Be;Dinero disponible - Entidad: Mercado Pago;Aprobado;29.000,00
+13/03/2026;20:02;Pago online;Pago online en Apple;Apple;Mastercard prepaga - Entidad: Mercado Pago;Aprobado;38.106,96
+14/03/2026;07:56;Pago online;Pago online en Apple;Apple;Mastercard prepaga - Entidad: Mercado Pago;Aprobado;2.945,88
+14/03/2026;16:00;Transferencia enviada;Transferencia enviada a Diego Hernan Lay#O;Diego Hernan Lay#O;Dinero disponible - Entidad: Mercado Pago;Aprobado;300.000,00
+15/03/2026;19:41;Transferencia enviada;Transferencia enviada a Diego Hernan Laynxxo;Diego Hernan Laynxxo;Dinero disponible - Entidad: Mercado Pago;Aprobado;40.000,00
+15/03/2026;22:29;Pago;Pago a Rappi Arg Sas;Rappi Arg Sas;Dinero disponible - Entidad: Mercado Pago;Aprobado;33.278,50
+16/03/2026;14:43;Transferencia enviada;Transferencia enviada a Diego Hernan Lay#O;Diego Hernan Lay#O;Dinero disponible - Entidad: Mercado Pago;Aprobado;150.000,00
+17/03/2026;12:17;Transferencia enviada;Transferencia enviada a Panizza Y Faccaro Srl .-;Panizza Y Faccaro Srl .-;Dinero disponible - Entidad: Mercado Pago;Aprobado;33.000,00
+17/03/2026;13:58;Transferencia enviada;Transferencia enviada a Martin Boullosa Perez;Martin Boullosa Perez;Dinero disponible - Entidad: Mercado Pago;Aprobado;5.800,00
+17/03/2026;15:30;Compra;Compra en Mercado Libre;Mercado Libre;Dinero disponible - Entidad: Mercado Pago;Aprobado;27.998,00
+17/03/2026;16:02;Pago;Pago en Farmacia Costa Srl;Farmacia Costa Srl;Dinero disponible - Entidad: Mercado Pago;Aprobado;11.100,00
+17/03/2026;21:52;Pago;Pago a Rappi Arg Sas;Rappi Arg Sas;Dinero disponible - Entidad: Mercado Pago;Aprobado;22.700,00
+18/03/2026;01:44;Pago online;Pago online en Apple;Apple;Mastercard prepaga - Entidad: Mercado Pago;Aprobado;1.479,02
+18/03/2026;11:14;Transferencia enviada;Transferencia enviada a Distribuidora Semas Sa;Distribuidora Semas Sa;Dinero disponible - Entidad: Mercado Pago;Aprobado;62.456,51
+18/03/2026;13:03;Transferencia enviada;Transferencia enviada a Salvador Jose Toscano;Salvador Jose Toscano;Dinero disponible - Entidad: Mercado Pago;Aprobado;50.000,00
+18/03/2026;13:46;Transferencia enviada;Transferencia enviada a Victoria Tola Romero;Victoria Tola Romero;Dinero disponible - Entidad: Mercado Pago;Aprobado;140.900,00
+18/03/2026;13:48;Transferencia enviada;Transferencia enviada a Baigorri Alonso Nicolas Y Delgiudice Rau;Baigorri Alonso Nicolas Y Delgiudice Rau;Dinero disponible - Entidad: Mercado Pago;Aprobado;59.600,07
+18/03/2026;17:22;Transferencia enviada;Transferencia enviada a Eduardo Alberto Miguel;Eduardo Alberto Miguel;Dinero disponible - Entidad: Mercado Pago;Aprobado;86.500,00
+19/03/2026;10:01;Pago;Pago en Logistica La Serenisima Sa;Logistica La Serenisima Sa;Dinero disponible - Entidad: Mercado Pago;Aprobado;50.900,00
+19/03/2026;10:12;Pago;Pago en Logistica La Serenisima Sa;Logistica La Serenisima Sa;Dinero disponible - Entidad: Mercado Pago;Aprobado;20.392,00
+19/03/2026;15:30;Pago online;Pago online en Verisure Alarmas;Verisure Alarmas;Mastercard prepaga - Entidad: Mercado Pago;Aprobado;159.929,42
+19/03/2026;17:28;Pago;Pago en Fresa;Fresa;Dinero disponible - Entidad: Mercado Pago;Aprobado;4.000,00
+20/03/2026;01:38;Pago;Pago a Rappi Arg Sas;Rappi Arg Sas;Dinero disponible - Entidad: Mercado Pago;Aprobado;6.980,00
+20/03/2026;13:27;Pago online;Pago online en Apple;Apple;Mastercard prepaga - Entidad: Mercado Pago;Aprobado;29.817,56
+20/03/2026;15:46;Pago en tienda física;Pago en tienda física en Mochi;Mochi;Dinero disponible - Entidad: Mercado Pago;Aprobado;13.100,00
+20/03/2026;16:15;Transferencia enviada;Transferencia enviada a Diego Hernan Lay#O;Diego Hernan Lay#O;Dinero disponible - Entidad: Mercado Pago;Aprobado;600.000,00
+20/03/2026;21:09;Transferencia enviada;Transferencia enviada a Jorge Luis Palacios;Jorge Luis Palacios;Dinero disponible - Entidad: Mercado Pago;Aprobado;4.800,00
+20/03/2026;22:33;Pago;Pago a Rappi Arg Sas;Rappi Arg Sas;Dinero disponible - Entidad: Mercado Pago;Aprobado;31.780,00
+20/03/2026;23:02;Pago online;Pago online en Pedidosya Lucciano;Pedidosya Lucciano;Mastercard prepaga - Entidad: Mercado Pago;Aprobado;26.819,50
+21/03/2026;15:02;Transferencia enviada;Transferencia enviada a Diego Hernan Lay#O;Diego Hernan Lay#O;Dinero disponible - Entidad: Mercado Pago;Aprobado;200.000,00
+21/03/2026;23:23;Pago;Pago a Rappi Arg Sas;Rappi Arg Sas;Dinero disponible - Entidad: Mercado Pago;Aprobado;32.265,00
+23/03/2026;00:28;Pago de impuesto;Pago de impuesto a Mercado Pago;Mercado Pago;Dinero disponible - Entidad: Mercado Pago;Aprobado;2.851,08
+23/03/2026;00:28;Pago de impuesto;Pago de impuesto a Mercado Pago;Mercado Pago;Dinero disponible - Entidad: Mercado Pago;Aprobado;2.851,08
+23/03/2026;10:57;Pago;Pago en Crafel Srl;Crafel Srl;Dinero disponible - Entidad: Mercado Pago;Aprobado;14.000,00
+23/03/2026;22:27;Pago;Pago a Rappi Arg Sas;Rappi Arg Sas;Dinero disponible - Entidad: Mercado Pago;Aprobado;23.881,00
+25/03/2026;14:54;Transferencia enviada;Transferencia enviada a Gerardo Carlos Hermida;Gerardo Carlos Hermida;Dinero disponible - Entidad: Mercado Pago;Aprobado;8.800,00
+25/03/2026;15:36;Transferencia enviada;Transferencia enviada a Diego Hernan Lay#O;Diego Hernan Lay#O;Dinero disponible - Entidad: Mercado Pago;Aprobado;700.000,00
+26/03/2026;05:24;Pago online;Pago online en Netflix;Netflix;Mastercard prepaga - Entidad: Mercado Pago;Aprobado;27.228,16
+26/03/2026;12:37;Transferencia enviada;Transferencia enviada a Diego Hernan Lay#O;Diego Hernan Lay#O;Dinero disponible - Entidad: Mercado Pago;Aprobado;300.000,00
+26/03/2026;14:34;Pago en tienda física;Pago en tienda física en Blanca Deco Cafe;Blanca Deco Cafe;Dinero disponible - Entidad: Mercado Pago;Aprobado;21.200,00
+26/03/2026;15:52;Transferencia enviada;Transferencia enviada a Diego Hernan Lay#O;Diego Hernan Lay#O;Dinero disponible - Entidad: Mercado Pago;Aprobado;100.000,00
+27/03/2026;09:02;Pago;Pago en Logistica La Serenisima Sa;Logistica La Serenisima Sa;Dinero disponible - Entidad: Mercado Pago;Aprobado;82.784,00
+27/03/2026;12:19;Transferencia enviada;Transferencia enviada a Albean Sa;Albean Sa;Dinero disponible - Entidad: Mercado Pago;Aprobado;68.998,79
+27/03/2026;14:55;Pago online;Pago online en Canva;Canva;Mastercard prepaga - Entidad: Mercado Pago;Aprobado;26.761,05
+27/03/2026;15:54;Pago online;Pago online en Apple;Apple;Mastercard prepaga - Entidad: Mercado Pago;Aprobado;9.523,20
+27/03/2026;16:40;Pago;Pago en Tecnologia Datri Srl;Tecnologia Datri Srl;Dinero disponible - Entidad: Mercado Pago;Aprobado;61.804,00
+28/03/2026;13:45;Transferencia enviada;Transferencia enviada a Sebastian Daniel Weckl;Sebastian Daniel Weckl;Dinero disponible - Entidad: Mercado Pago;Aprobado;88.000,00
+28/03/2026;16:44;Pago en tienda física;Pago en tienda física en Bulli Bar;Bulli Bar;Dinero disponible - Entidad: Mercado Pago;Aprobado;21.000,00
+30/03/2026;09:58;Pago;Pago en Logistica La Serenisima Sa;Logistica La Serenisima Sa;Dinero disponible - Entidad: Mercado Pago;Aprobado;47.526,00
+30/03/2026;15:32;Transferencia enviada;Transferencia enviada a Victoria Tola Romero;Victoria Tola Romero;Dinero disponible - Entidad: Mercado Pago;Aprobado;116.900,00
+31/03/2026;11:37;Pago;Pago en Logistica La Serenisima Sa;Logistica La Serenisima Sa;Dinero disponible - Entidad: Mercado Pago;Aprobado;93.933,00
+31/03/2026;12:35;Transferencia enviada;Transferencia enviada a Kevin Norberto Mejuto;Kevin Norberto Mejuto;Dinero disponible - Entidad: Mercado Pago;Aprobado;44.500,00
+31/03/2026;16:15;Compra;Compra en Mercado Libre;Mercado Libre;Dinero disponible - Entidad: Mercado Pago;Aprobado;19.320,00
+31/03/2026;20:14;Pago en tienda física;Pago en tienda física en Carrefour;Carrefour;Dinero disponible - Entidad: Mercado Pago;Aprobado;12.364,00
+31/03/2026;21:17;Compra;Compra en Mercado Libre;Mercado Libre;Dinero disponible - Entidad: Mercado Pago;Aprobado;46.336,85

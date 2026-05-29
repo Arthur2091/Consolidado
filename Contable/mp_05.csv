@@ -1,0 +1,65 @@
+fecha,hora,tipo,detalle,monto,medio_de_pago,canal,banco_o_destino,identificador_visible,motivo_o_info_extra,estado
+27/05/2026,14:10,transferencia_enviada,Diego Hernan Layño,190000.00,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 0127,Varios,Aprobado
+27/05/2026,12:45,transferencia_enviada,Albean Sa,46983.57,Dinero disponible,transferencia,Banco Santander,CBU terminado en 9090,Varios,Aprobado
+27/05/2026,10:44,transferencia_enviada,Distribuidora Semas Sa,170000.00,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 4499,Varios,Aprobado
+27/05/2026,10:40,pago,Logistica La Serenisima Sa,27895.00,Dinero disponible,QR/interoperable,Getnet Arg Agrupador,,Billetera virtual Getnet,Aprobado
+26/05/2026,22:15,pago_online,Claude Ai,15746.52,Mastercard prepaga,Tarjeta virtual,,,Pago online,Aprobado
+26/05/2026,15:58,transferencia_enviada,Diego Hernan Layño,500000.00,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 0127,Varios,Aprobado
+26/05/2026,15:39,pago_online,Claude Ai,30281.75,Mastercard prepaga,Tarjeta virtual,,,Pago online,Aprobado
+26/05/2026,05:55,pago_online,Netflix,27450.41,Mastercard prepaga,Tarjeta virtual,,,Compra internacional,Aprobado
+25/05/2026,23:14,transferencia_enviada,Eduardo Alberto Miguel,144000.00,Dinero disponible,transferencia,Cuenta Mercado Pago,CVU terminado en 0882,Varios,Aprobado
+25/05/2026,22:25,pago_online,Claude Ai,30281.75,Mastercard prepaga,Tarjeta virtual,,,Pago online,Aprobado
+24/05/2026,19:08,transferencia_enviada,Diego Hernan Layño,100000.00,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 0127,Varios,Aprobado
+24/05/2026,15:21,transferencia_enviada,Incarnato Eduardo,36000.00,Dinero disponible,transferencia,Banco Nación,CBU terminado en 5479,Varios,Aprobado
+23/05/2026,15:45,transferencia_enviada,Diego Hernan Layño,200000.00,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 0127,Varios,Aprobado
+22/05/2026,20:22,transferencia_enviada,Sergio Leonardo Martiarena,53000.00,Dinero disponible,transferencia,Cuenta Mercado Pago,CVU terminado en 9957,Varios,Aprobado
+22/05/2026,19:30,transferencia_enviada,Diego Hernan Layño,50000.00,Dinero disponible,transferencia,Personal Pay,CBU terminado en 0749,Varios,Aprobado
+22/05/2026,11:03,pago,Logistica La Serenisima Sa,76259.00,Dinero disponible,QR/interoperable,Getnet Arg Agrupador,,Billetera virtual Getnet,Aprobado
+21/05/2026,18:03,pago_online,Claude Ai,38020.13,Mastercard prepaga,Tarjeta virtual,,,Pago online,Aprobado
+21/05/2026,15:04,transferencia_enviada,Victoria Tola Romero,215000.00,Dinero disponible,transferencia,Cuenta Mercado Pago,CVU terminado en 3174,Varios,Aprobado
+21/05/2026,10:41,transferencia_enviada,Albean Sa,113000.00,Dinero disponible,transferencia,Banco Santander,CBU terminado en 9090,Varios,Aprobado
+21/05/2026,10:36,transferencia_enviada,Tostadero Porto Expreso S.A.,245630.00,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 8597,Varios,Aprobado
+20/05/2026,16:03,pago_online,Apple,15233.72,Mastercard prepaga,Tarjeta virtual,,,Pago online,Aprobado
+20/05/2026,13:59,transferencia_enviada,Diego Hernan Layño,300000.00,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 0127,Varios,Aprobado
+20/05/2026,13:28,pago_online,Apple,30452.20,Mastercard prepaga,Tarjeta virtual,,,Pago online,Aprobado
+20/05/2026,10:11,transferencia_enviada,Diego Hernan Layño,200000.00,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 0127,Varios,Aprobado
+20/05/2026,09:57,transferencia_enviada,Distribuidora Semas Sa,151292.51,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 4499,Varios,Aprobado
+19/05/2026,18:05,compra,Compra en Mercado Libre,16487.00,Dinero disponible,compra,Mercado Libre,,1 producto entregado,Aprobado
+19/05/2026,10:13,pago,Logistica La Serenisima Sa,55790.00,Dinero disponible,QR/interoperable,Getnet Arg Agrupador,,Billetera virtual Getnet,Aprobado
+18/05/2026,14:32,transferencia_enviada,Diego Hernan Layño,200000.00,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 0127,Varios,Aprobado
+18/05/2026,11:32,pago_online,Claro,44219.09,Mastercard prepaga,Tarjeta virtual,,,Pago online,Aprobado
+18/05/2026,01:44,pago_online,Apple,1505.34,Mastercard prepaga,Tarjeta virtual,,,Pago online,Aprobado
+17/05/2026,19:26,transferencia_enviada,Diego Hernan Layño,100000.00,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 0127,Varios,Aprobado
+16/05/2026,13:45,transferencia_enviada,Diego Hernan Layño,400000.00,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 0127,Varios,Aprobado
+15/05/2026,14:03,pago_tienda_fisica,Blanca Deco Cafe,19800.00,Dinero disponible,QR,BLANCA DECO CAFE,Tagle 2589 CABA,Pago en tienda física,Aprobado
+09/05/2026,16:47,transferencia_enviada,Victoria Tola Romero,211400.00,Dinero disponible,transferencia,Cuenta Mercado Pago,CVU terminado en 3174,Varios,Aprobado
+09/05/2026,12:13,transferencia_enviada,Diego Hernan Layño,200000.00,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 0127,Varios,Aprobado
+08/05/2026,19:55,transferencia_enviada,Diego Hernan Layño,300000.00,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 0127,Varios,Aprobado
+08/05/2026,16:27,pago_tienda_fisica,Bulli Bar,22500.00,Dinero disponible,QR,,,Aprobado
+08/05/2026,16:27,pago_propina,Bulli Bar,1800.00,Dinero disponible,QR,,,Aprobado
+08/05/2026,14:39,transferencia_enviada,Paola Alexandra Vega Narvaez,2900.00,Dinero disponible,transferencia,Cuenta Mercado Pago,CVU terminado en 3989,Varios,Aprobado
+08/05/2026,13:07,transferencia_enviada,Kevin Norberto Mejuto,216000.00,Dinero disponible,transferencia,Cuenta Mercado Pago,CVU terminado en 5247,Varios,Aprobado
+08/05/2026,12:53,transferencia_enviada,Diego Hernan Layño,200000.00,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 0127,Varios,Aprobado
+08/05/2026,09:43,transferencia_enviada,Delgado Silvia Raquel,246000.00,Dinero disponible,transferencia,Banco Nación,CBU terminado en 8897,Varios,Aprobado
+08/05/2026,09:07,pago,Logistica La Serenisima Sa,53000.00,Dinero disponible,QR/interoperable,Getnet Arg Agrupador,,Billetera virtual Getnet,Aprobado
+07/05/2026,16:15,transferencia_enviada,Maria Alejandra Carcamo,42900.00,Dinero disponible,transferencia,Cuenta Mercado Pago,CVU terminado en 9172,Varios,Aprobado
+07/05/2026,09:50,transferencia_enviada,Tostadero Porto Expreso S.A.,150000.00,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 8597,Varios,Aprobado
+07/05/2026,00:02,pago_online,Apple,15125.75,Mastercard prepaga,Tarjeta virtual,,,Aprobado
+06/05/2026,10:11,pago,Logistica La Serenisima Sa,49000.00,Dinero disponible,QR/interoperable,Getnet Arg Agrupador,,Billetera virtual Getnet,Aprobado
+06/05/2026,09:36,transferencia_enviada,Distribuidora Semas Sa,148862.46,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 4499,Varios,Aprobado
+05/05/2026,13:58,transferencia_enviada,Albean Sa,173058.00,Dinero disponible,transferencia,Banco Santander,CBU terminado en 9090,Varios,Aprobado
+05/05/2026,11:31,transferencia_enviada,Pampa Vida Srl,98968.32,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 6602,Varios,Aprobado
+04/05/2026,16:47,pago_tienda_fisica,Axion Energy,79016.97,Dinero disponible,QR,Axion Energy,Brasil 2986 CABA,,Aprobado
+04/05/2026,15:45,transferencia_enviada,Diego Hernan Layño,300000.00,Dinero disponible,transferencia,Banco de Galicia,CBU terminado en 0127,Varios,Aprobado
+04/05/2026,13:03,transferencia_enviada,Gabriel Delfino,48700.00,Dinero disponible,transferencia,Cuenta Mercado Pago,CVU terminado en 2564,Varios,Aprobado
+04/05/2026,12:39,compra,Bombo Community,102350.00,Visa débito,compra,Banco Galicia,Tarjeta terminada en 1633,2 productos,Aprobado
+04/05/2026,11:45,transferencia_enviada,Albean Sa,46880.40,Dinero disponible,transferencia,Banco Santander,CBU terminado en 9090,Varios,Aprobado
+04/05/2026,09:41,pago_tienda_fisica,Coca-Cola FEMSA de Buenos Aires S.A.,93388.12,Dinero disponible,QR,Coca-Cola FEMSA,Av. Amancio Alcorta 3570 CABA,,Aprobado
+04/05/2026,09:09,pago,Logistica La Serenisima Sa,55141.00,Dinero disponible,QR/interoperable,Getnet Arg Agrupador,,Billetera virtual Getnet,Aprobado
+03/05/2026,22:14,pago_tienda_fisica,Cinema Devoto,34300.00,Dinero disponible,QR,Cinema Devoto,Simbrón 4840 CABA,,Aprobado
+02/05/2026,16:42,pago_tienda_fisica,Bulli Bar,23700.00,Dinero disponible,QR,Bulli Bar,Av. Caseros 2401 Parque Patricios,,Aprobado
+02/05/2026,15:24,pago_servicio,Río Uruguay Seguros,23400.00,Dinero disponible,servicio,,,Vencimiento 24/ago/2026,Aprobado
+02/05/2026,15:23,pago_servicio,Río Uruguay Seguros,23400.00,Dinero disponible,servicio,,,Vencimiento 23/sept/2026,Aprobado
+02/05/2026,15:22,pago_servicio,Edesur,379052.71,Dinero disponible,servicio,,,Vencimiento 24/abr/2026,Aprobado
+02/05/2026,08:45,pago,Logistica La Serenisima Sa,79500.00,Dinero disponible,QR/interoperable,Getnet Arg Agrupador,,Billetera virtual Getnet,Aprobado
+01/05/2026,00:15,pago,Rappi Arg Sas,27080.00,Dinero disponible,conexión de cuenta,,,Order_463690605,Aprobado

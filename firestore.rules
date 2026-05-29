@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helpers ─────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.email != null
+        && request.auth.token.email.lower() == 'hernan.layno@gmail.com';
+    }
+
+    // ─── usuarios/{uid} ──────────────────────────────────────────
+    // Cada usuario puede leer SU propio doc (para que la app cargue sus permisos).
+    // Solo el admin puede listar todos o modificar permisos.
+    match /usuarios/{uid} {
+      allow get:    if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow list:   if isAdmin();
+      allow create: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow update, delete: if isAdmin();
+    }
+
+    // ─── config/{doc} ────────────────────────────────────────────
+    // Cualquier usuario logueado puede leer la config (permisos default, etc.).
+    // Solo el admin escribe.
+    match /config/{doc} {
+      allow read:  if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ─── data/contable ───────────────────────────────────────────
+    // Datos financieros sensibles: ventas, sueldos, egresos, productos vendidos.
+    // SOLO el admin puede leer o escribir.
+    match /data/contable {
+      allow read, write: if isAdmin();
+    }
+
+    // ─── data/{resto de los docs} ────────────────────────────────
+    // insumos, proveedores, precios, facturas, recetas, deposito, etc.
+    // Cualquier usuario autenticado puede leer y escribir.
+    match /data/{docId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // ─── Cualquier otra ruta: denegada por default ──────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
